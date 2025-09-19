@@ -124,7 +124,7 @@ function getNextRoomIndex(rotations: any[], nextPeriod: string, frequency: strin
   return (periodNumber - 1) % rotations.length
 }
 
-// Helper function to format period for display
+// Helper function to format period for display (same as admin panel)
 function formatPeriod(period: string, frequency: string): string {
   if (frequency === 'weekly') {
     const match = period.match(/(\d{4})-W(\d{2})/);
@@ -132,14 +132,27 @@ function formatPeriod(period: string, frequency: string): string {
       const year = parseInt(match[1]);
       const week = parseInt(match[2]);
       
-      // Calculate start and end of week (Monday to Sunday)
-      const jan4 = new Date(year, 0, 4);
-      const jan4Day = jan4.getDay() || 7;
-      const mondayOfWeek1 = new Date(jan4.getTime() - (jan4Day - 1) * 24 * 60 * 60 * 1000);
-      const weekStart = new Date(mondayOfWeek1.getTime() + (week - 1) * 7 * 24 * 60 * 60 * 1000);
-      const weekEnd = new Date(weekStart.getTime() + 6 * 24 * 60 * 60 * 1000);
-      
-      return `${weekStart.toLocaleDateString('cs-CZ', { day: 'numeric', month: 'numeric' })}. - ${weekEnd.toLocaleDateString('cs-CZ', { day: 'numeric', month: 'numeric', year: 'numeric' })}.`;
+      // Use same logic as admin panel
+      if (week === 1) {
+        // Týden 1: 1.1. do 7.1.
+        const jan1 = new Date(year, 0, 1);
+        const jan7 = new Date(year, 0, 7);
+        return `${jan1.toLocaleDateString('cs-CZ', { day: 'numeric', month: 'numeric' })}. - ${jan7.toLocaleDateString('cs-CZ', { day: 'numeric', month: 'numeric', year: 'numeric' })}.`;
+      } else {
+        // Pro ostatní týdny: začátek v pondělí, konec v neděli
+        // Najdi první pondělí roku (8.1. nebo později)
+        let firstMonday = new Date(year, 0, 8); // 8. ledna
+        const dayOfWeek = firstMonday.getDay();
+        if (dayOfWeek !== 1) { // Pokud není pondělí
+          firstMonday = new Date(firstMonday.getTime() + (8 - dayOfWeek) * 24 * 60 * 60 * 1000);
+        }
+        
+        // Vypočítej týden na základě rozdílu od prvního pondělí
+        const weekStart = new Date(firstMonday.getTime() + (week - 2) * 7 * 24 * 60 * 60 * 1000);
+        const weekEnd = new Date(weekStart.getTime() + 6 * 24 * 60 * 60 * 1000);
+        
+        return `${weekStart.toLocaleDateString('cs-CZ', { day: 'numeric', month: 'numeric' })}. - ${weekEnd.toLocaleDateString('cs-CZ', { day: 'numeric', month: 'numeric', year: 'numeric' })}.`;
+      }
     }
   } else if (frequency === 'biweekly') {
     const match = period.match(/(\d{4})-BW(\d{2})/);

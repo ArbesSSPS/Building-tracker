@@ -124,39 +124,56 @@ function getNextRoomIndex(rotations: any[], nextPeriod: string, frequency: strin
   return (periodNumber - 1) % rotations.length
 }
 
-// Helper function to format period for display
+// Helper function to format period for display (same as admin panel)
 function formatPeriod(period: string, frequency: string): string {
   if (frequency === 'weekly') {
     const match = period.match(/(\d{4})-W(\d{2})/);
     if (match) {
       const year = parseInt(match[1]);
       const week = parseInt(match[2]);
-      const date = new Date(year, 0, 1 + (week - 1) * 7);
-      const startDate = new Date(date.getTime() - date.getDay() * 24 * 60 * 60 * 1000);
-      const endDate = new Date(startDate.getTime() + 6 * 24 * 60 * 60 * 1000);
       
-      const startStr = startDate.toLocaleDateString('cs-CZ', { day: '2-digit', month: '2-digit' });
-      const endStr = endDate.toLocaleDateString('cs-CZ', { day: '2-digit', month: '2-digit' });
-      
-      return `${startStr} - ${endStr} ${year}`;
+      // Use same logic as admin panel
+      if (week === 1) {
+        // Týden 1: 1.1. do 7.1.
+        const jan1 = new Date(year, 0, 1);
+        const jan7 = new Date(year, 0, 7);
+        return `${jan1.toLocaleDateString('cs-CZ', { day: 'numeric', month: 'numeric' })}. - ${jan7.toLocaleDateString('cs-CZ', { day: 'numeric', month: 'numeric', year: 'numeric' })}.`;
+      } else {
+        // Pro ostatní týdny: začátek v pondělí, konec v neděli
+        // Najdi první pondělí roku (8.1. nebo později)
+        let firstMonday = new Date(year, 0, 8); // 8. ledna
+        const dayOfWeek = firstMonday.getDay();
+        if (dayOfWeek !== 1) { // Pokud není pondělí
+          firstMonday = new Date(firstMonday.getTime() + (8 - dayOfWeek) * 24 * 60 * 60 * 1000);
+        }
+        
+        // Vypočítej týden na základě rozdílu od prvního pondělí
+        const weekStart = new Date(firstMonday.getTime() + (week - 2) * 7 * 24 * 60 * 60 * 1000);
+        const weekEnd = new Date(weekStart.getTime() + 6 * 24 * 60 * 60 * 1000);
+        
+        return `${weekStart.toLocaleDateString('cs-CZ', { day: 'numeric', month: 'numeric' })}. - ${weekEnd.toLocaleDateString('cs-CZ', { day: 'numeric', month: 'numeric', year: 'numeric' })}.`;
+      }
     }
   } else if (frequency === 'biweekly') {
     const match = period.match(/(\d{4})-BW(\d{2})/);
     if (match) {
       const year = parseInt(match[1]);
       const biweek = parseInt(match[2]);
-      const startWeek = (biweek - 1) * 2 + 1;
-      const endWeek = biweek * 2;
+      const weekStart = new Date(year, 0, 1);
+      const biweekStart = new Date(weekStart.getTime() + (biweek - 1) * 14 * 24 * 60 * 60 * 1000);
+      const biweekEnd = new Date(biweekStart.getTime() + 13 * 24 * 60 * 60 * 1000);
       
-      return `${year} - ${startWeek}. a ${endWeek}. týden`;
+      return `${biweekStart.toLocaleDateString('cs-CZ', { day: 'numeric', month: 'numeric' })}. - ${biweekEnd.toLocaleDateString('cs-CZ', { day: 'numeric', month: 'numeric', year: 'numeric' })}.`;
     }
   } else if (frequency === 'monthly') {
     const match = period.match(/(\d{4})-M(\d{2})/);
     if (match) {
       const year = parseInt(match[1]);
       const month = parseInt(match[2]);
-      const monthName = new Date(year, month - 1).toLocaleDateString('cs-CZ', { month: 'long' });
-      return `${monthName} ${year}`;
+      const monthStart = new Date(year, month - 1, 1);
+      const monthEnd = new Date(year, month, 0);
+      
+      return `${monthStart.toLocaleDateString('cs-CZ', { day: 'numeric', month: 'numeric' })}. - ${monthEnd.toLocaleDateString('cs-CZ', { day: 'numeric', month: 'numeric', year: 'numeric' })}.`;
     }
   }
   

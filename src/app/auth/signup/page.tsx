@@ -141,44 +141,56 @@ export default function SignUp() {
                 required
               />
 
-              <div className="relative">
-                <Input
-                  label="Heslo"
-                  type={showPassword ? 'text' : 'password'}
-                  placeholder="Heslo (min. 6 znaků)"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  icon={<Lock className="w-5 h-5" />}
-                  className="pr-12"
-                  required
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
-                >
-                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                </button>
+              <div className="w-full">
+                <label className="block text-sm font-medium text-gray-700 mb-3">
+                  Heslo
+                </label>
+                <div className="relative flex items-center border border-gray-300 rounded-lg bg-white transition-all duration-200 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-100">
+                  <div className="pl-3 text-gray-400">
+                    <Lock className="w-5 h-5" />
+                  </div>
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    placeholder="Heslo (min. 6 znaků)"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="flex-1 py-3 px-3 border-0 outline-none bg-transparent text-gray-900 placeholder-gray-500 pr-12"
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors z-10"
+                  >
+                    {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  </button>
+                </div>
               </div>
 
-              <div className="relative">
-                <Input
-                  label="Potvrzení hesla"
-                  type={showConfirmPassword ? 'text' : 'password'}
-                  placeholder="Potvrzení hesla"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  icon={<Lock className="w-5 h-5" />}
-                  className="pr-12"
-                  required
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
-                >
-                  {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                </button>
+              <div className="w-full">
+                <label className="block text-sm font-medium text-gray-700 mb-3">
+                  Potvrzení hesla
+                </label>
+                <div className="relative flex items-center border border-gray-300 rounded-lg bg-white transition-all duration-200 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-100">
+                  <div className="pl-3 text-gray-400">
+                    <Lock className="w-5 h-5" />
+                  </div>
+                  <input
+                    type={showConfirmPassword ? 'text' : 'password'}
+                    placeholder="Potvrzení hesla"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    className="flex-1 py-3 px-3 border-0 outline-none bg-transparent text-gray-900 placeholder-gray-500 pr-12"
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors z-10"
+                  >
+                    {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  </button>
+                </div>
               </div>
 
               {error && (

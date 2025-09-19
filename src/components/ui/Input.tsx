@@ -19,19 +19,19 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
         transition={{ duration: 0.2 }}
       >
         {label && (
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="block text-sm font-medium text-gray-700 mb-3">
             {label}
           </label>
         )}
-        <div className="relative">
+        <div className={`relative flex items-center border border-gray-300 rounded-lg bg-white transition-all duration-200 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-100 ${error ? 'border-red-500' : ''}`}>
           {icon && (
-            <div className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400">
+            <div className="pl-3 text-gray-400">
               {icon}
             </div>
           )}
           <input
             ref={ref}
-            className={`input ${icon ? 'pl-12' : ''} ${error ? 'border-red-500' : ''} ${className}`}
+            className={`flex-1 py-3 px-3 border-0 outline-none bg-transparent text-gray-900 placeholder-gray-500 ${className}`}
             {...props}
           />
         </div>

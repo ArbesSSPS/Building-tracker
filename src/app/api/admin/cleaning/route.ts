@@ -103,6 +103,7 @@ export async function GET() {
           users: currentRoom.room.users.map(u => ({
             id: u.id,
             name: u.name,
+            lastName: u.lastName,
             email: u.email
           }))
         } : null,

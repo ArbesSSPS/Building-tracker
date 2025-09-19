@@ -84,6 +84,7 @@ export async function GET() {
         users: currentRoom.room.users.map(u => ({
           id: u.id,
           name: u.name,
+          lastName: u.lastName,
           email: u.email
         }))
       } : null,
@@ -94,12 +95,21 @@ export async function GET() {
         users: r.room.users.map(u => ({
           id: u.id,
           name: u.name,
+          lastName: u.lastName,
           email: u.email
         }))
       })),
       records: cleaningRecords.map(r => ({
-        ...r,
-        photos: JSON.parse(r.photos || '[]')
+        id: r.id,
+        photos: JSON.parse(r.photos || '[]'),
+        completedAt: r.completedAt,
+        user: {
+          name: r.user.name,
+          lastName: r.user.lastName
+        },
+        room: {
+          name: r.room.name
+        }
       })),
       hasPendingChange,
       pendingFrequency: floor.cleaningSettings?.pendingFrequency,

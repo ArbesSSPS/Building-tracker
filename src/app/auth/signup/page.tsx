@@ -11,6 +11,7 @@ import Card from '@/components/ui/Card'
 
 export default function SignUp() {
   const [name, setName] = useState('')
+  const [lastName, setLastName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
@@ -44,7 +45,7 @@ export default function SignUp() {
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ name, email, password, code })
+        body: JSON.stringify({ name, lastName, email, password, code })
       })
 
       const data = await response.json()
@@ -111,15 +112,25 @@ export default function SignUp() {
         >
           <Card className="p-8">
             <form onSubmit={handleSubmit} className="space-y-6">
-              <Input
-                label="Jméno"
-                type="text"
-                placeholder="Vaše jméno"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                icon={<User className="w-5 h-5" />}
-                required
-              />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <Input
+                  label="Jméno"
+                  type="text"
+                  placeholder="Vaše jméno"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  icon={<User className="w-5 h-5" />}
+                  required
+                />
+                <Input
+                  label="Příjmení"
+                  type="text"
+                  placeholder="Vaše příjmení"
+                  value={lastName}
+                  onChange={(e) => setLastName(e.target.value)}
+                  icon={<User className="w-5 h-5" />}
+                />
+              </div>
 
               <Input
                 label="Email"

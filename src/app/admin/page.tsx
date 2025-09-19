@@ -45,6 +45,10 @@ export default function AdminDashboard() {
   const [refreshing, setRefreshing] = useState(false)
   const [activeTab, setActiveTab] = useState<'floors' | 'rooms' | 'users' | 'codes' | 'activity' | 'cleaning'>('floors')
 
+  const getDisplayName = (name: string, lastName?: string | null) => {
+    return lastName ? `${name} ${lastName}` : name
+  }
+
   // Floor management
   const [newFloor, setNewFloor] = useState({ number: '', name: '' })
   const [newRoom, setNewRoom] = useState({ name: '', floorId: '' })
@@ -1222,7 +1226,7 @@ export default function AdminDashboard() {
                         <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center gap-4">
                           <div className="flex-1">
                             <h4 className="text-sm font-semibold text-gray-900">
-                              {user.name}
+                              {getDisplayName(user.name, user.lastName)}
                               {((user.penaltyCount ?? penaltyCounts[user.id] ?? 0) > 0) && (
                                 <span className="ml-2 text-xs font-medium text-red-700 bg-red-100 px-2 py-0.5 rounded-full">
                                   Trestné body: {user.penaltyCount ?? penaltyCounts[user.id]}
@@ -1409,7 +1413,7 @@ export default function AdminDashboard() {
                             <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-4 gap-2">
                               <div>
                                 <h4 className="text-sm font-semibold text-gray-900">
-                                  {session.user.name}
+                                  {getDisplayName(session.user.name, session.user.lastName)}
                                 </h4>
                                 <p className="text-xs text-gray-500">
                                   {session.user.room?.name || 'Nepřiřazeno'} 
@@ -1628,7 +1632,7 @@ export default function AdminDashboard() {
                                   Aktuálně zodpovědná: {floor.currentRoom.name}
                                 </p>
                                 <p className="text-xs text-blue-700">
-                                  {floor.currentRoom.users.map((u: any) => u.name).join(', ')}
+                                  {floor.currentRoom.users.map((u: any) => getDisplayName(u.name, u.lastName)).join(', ')}
                                 </p>
                               </div>
                             )}
@@ -1670,7 +1674,7 @@ export default function AdminDashboard() {
                                         )}
                                       </div>
                                       <div className="text-gray-500">
-                                        {floor.currentRoom.users.map((u: any) => u.name).join(', ')}
+                                        {floor.currentRoom.users.map((u: any) => getDisplayName(u.name, u.lastName)).join(', ')}
                                       </div>
                                       <div className="text-xs text-gray-600 mt-1">
                                         Období: {formatPeriod(floor.currentPeriod, floor.settings?.frequency || 'weekly')}
@@ -1711,7 +1715,7 @@ export default function AdminDashboard() {
                                               <span className="text-blue-600 text-xs">Připraveno</span>
                                             </div>
                                             <div className="text-gray-500">
-                                              {nextRoom.room.users.map((u: any) => u.name).join(', ')}
+                                              {nextRoom.room.users.map((u: any) => getDisplayName(u.name, u.lastName)).join(', ')}
                                             </div>
                                             <div className="text-xs text-blue-600 mt-1">
                                               Období: {formatPeriod(nextPeriod, floor.settings?.frequency || 'weekly')}
@@ -1757,7 +1761,7 @@ export default function AdminDashboard() {
                                   <div className="flex items-center justify-between mb-2">
                                     <div className="flex items-center space-x-2">
                                       <span className="text-sm font-medium text-gray-900">
-                                        {currentRoom.name} - {currentRecord.user?.name || '—'}
+                                        {currentRoom.name} - {currentRecord.user ? getDisplayName(currentRecord.user.name, currentRecord.user.lastName) : '—'}
                                       </span>
                                       <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">
                                         Aktuální období
@@ -1911,7 +1915,7 @@ export default function AdminDashboard() {
                                                   </>
                                                 ) : (
                                                   <div>
-                                                    Zodpovědní: {(responsibleRoom.users || []).map((u: any) => u.name).join(', ')}
+                                                    Zodpovědní: {(responsibleRoom.users || []).map((u: any) => getDisplayName(u.name, u.lastName)).join(', ')}
                                                   </div>
                                                 )}
                                               </div>

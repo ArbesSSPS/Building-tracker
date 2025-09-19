@@ -24,6 +24,7 @@ import Input from '@/components/ui/Input'
 interface UserProfile {
   id: string
   name: string
+  lastName: string | null
   email: string
   room: {
     id: string
@@ -36,6 +37,7 @@ interface UserProfile {
     users: Array<{
       id: string
       name: string
+      lastName: string | null
       email: string
     }>
   } | null
@@ -57,10 +59,15 @@ export default function SettingsPage() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [alarmCode, setAlarmCode] = useState('')
+  const [alarmCodeError, setAlarmCodeError] = useState('')
   const [newCodeCount, setNewCodeCount] = useState(1)
   const [newCodeExpires, setNewCodeExpires] = useState(30)
   const [generating, setGenerating] = useState(false)
   const [copiedCode, setCopiedCode] = useState<string | null>(null)
+
+  const getDisplayName = (name: string, lastName?: string | null) => {
+    return lastName ? `${name} ${lastName}` : name
+  }
 
   useEffect(() => {
     if (session) {
@@ -94,7 +101,30 @@ export default function SettingsPage() {
     }
   }
 
+  const validateAlarmCode = (code: string) => {
+    if (code === '') {
+      setAlarmCodeError('')
+      return true
+    }
+    if (!/^\d{4}$/.test(code)) {
+      setAlarmCodeError('Kód musí obsahovat přesně 4 číslice')
+      return false
+    }
+    setAlarmCodeError('')
+    return true
+  }
+
+  const handleAlarmCodeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value.replace(/\D/g, '').slice(0, 4)
+    setAlarmCode(value)
+    validateAlarmCode(value)
+  }
+
   const saveAlarmCode = async () => {
+    if (!validateAlarmCode(alarmCode)) {
+      return
+    }
+    
     setSaving(true)
     try {
       const response = await fetch('/api/user/profile', {
@@ -219,7 +249,7 @@ export default function SettingsPage() {
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Jméno
                 </label>
-                <p className="text-gray-900">{profile?.name}</p>
+                <p className="text-gray-900">{getDisplayName(profile?.name || '', profile?.lastName)}</p>
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -255,7 +285,7 @@ export default function SettingsPage() {
                       {profile.room.users.map((user) => (
                         <p key={user.id} className="text-gray-900 flex items-center">
                           <Users className="w-4 h-4 mr-1" />
-                          {user.name} ({user.email})
+                          {getDisplayName(user.name, user.lastName)} ({user.email})
                         </p>
                       ))}
                     </div>
@@ -278,14 +308,15 @@ export default function SettingsPage() {
               <div className="flex space-x-3">
                 <Input
                   type="text"
-                  placeholder="Zadejte kód od alarmu"
+                  placeholder="Zadejte 4místný kód od alarmu"
                   value={alarmCode}
-                  onChange={(e) => setAlarmCode(e.target.value)}
+                  onChange={handleAlarmCodeChange}
+                  error={alarmCodeError}
                   className="flex-1"
                 />
                 <Button
                   onClick={saveAlarmCode}
-                  disabled={saving}
+                  disabled={saving || !!alarmCodeError}
                   className="flex items-center space-x-2"
                 >
                   <Save className="w-4 h-4" />
@@ -318,9 +349,12 @@ export default function SettingsPage() {
                     <Input
                       type="number"
                       min="1"
-                      max="10"
+                      max="3"
                       value={newCodeCount}
-                      onChange={(e) => setNewCodeCount(parseInt(e.target.value) || 1)}
+                      onChange={(e) => {
+                        const value = parseInt(e.target.value) || 1
+                        setNewCodeCount(Math.min(Math.max(value, 1), 3))
+                      }}
                     />
                   </div>
                   <div className="flex-1">

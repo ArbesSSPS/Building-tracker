@@ -34,6 +34,7 @@ interface CleaningData {
     users: Array<{
       id: string
       name: string
+      lastName: string | null
       email: string
     }>
   } | null
@@ -44,6 +45,7 @@ interface CleaningData {
     users: Array<{
       id: string
       name: string
+      lastName: string | null
       email: string
     }>
   }>
@@ -53,6 +55,7 @@ interface CleaningData {
     completedAt: string
     user: {
       name: string
+      lastName: string | null
     }
     room: {
       name: string
@@ -71,6 +74,10 @@ export default function CleaningPage() {
   const [cleaningCompleted, setCleaningCompleted] = useState(false)
   const [nextCleaningDate, setNextCleaningDate] = useState<Date | null>(null)
   const [isAlreadyCompleted, setIsAlreadyCompleted] = useState(false)
+
+  const getDisplayName = (name: string, lastName?: string | null) => {
+    return lastName ? `${name} ${lastName}` : name
+  }
 
   useEffect(() => {
     if (session) {
@@ -665,7 +672,7 @@ export default function CleaningPage() {
                         <div>
                           <span className="font-medium">{room.name}</span>
                           <span className="text-sm text-gray-500 ml-2">
-                            ({room.users.map(u => u.name).join(', ')})
+                            ({room.users.map(u => getDisplayName(u.name, u.lastName)).join(', ')})
                           </span>
                         </div>
                         <div className="flex items-center space-x-2">
@@ -716,7 +723,7 @@ export default function CleaningPage() {
                         </span>
                       </div>
                       <p className="text-sm text-green-700">
-                        Zodpovědní: {cleaningData.rotation[currentUserRoomIndex].users.map(u => u.name).join(', ')}
+                        Zodpovědní: {cleaningData.rotation[currentUserRoomIndex].users.map(u => getDisplayName(u.name, u.lastName)).join(', ')}
                       </p>
                       {periodsUntilUserTurn === 0 ? (
                         <p className="text-sm text-green-600 mt-2 font-medium">
@@ -830,7 +837,7 @@ export default function CleaningPage() {
                     <div>
                       <span className="font-medium">{record.room.name}</span>
                       <span className="text-sm text-gray-500 ml-2">
-                        - {record.user.name}
+                        - {getDisplayName(record.user.name, record.user.lastName)}
                       </span>
                     </div>
                     <span className="text-sm text-gray-500">

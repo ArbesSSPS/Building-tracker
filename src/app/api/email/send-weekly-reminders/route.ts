@@ -228,19 +228,19 @@ export async function POST(request: NextRequest) {
 
       // Send email to ALL responsible users for this floor
       if (nextRoom.users && nextRoom.users.length > 0) {
-        const responsiblePeople = nextRoom.users.map(u => u.name).join(', ');
+        const responsiblePeople = nextRoom.users.map(u => u.lastName ? `${u.name} ${u.lastName}` : u.name).join(', ');
         const weekDate = formatPeriod(nextPeriod, frequency);
         
         // Send individual email to each responsible user
         for (const user of nextRoom.users) {
           if (!user.email) {
-            console.log(`User ${user.name} has no email, skipping...`);
+            console.log(`User ${user.lastName ? `${user.name} ${user.lastName}` : user.name} has no email, skipping...`);
             continue;
           }
           
           const emailData: CleaningReminderData = {
             recipientEmail: user.email,
-            recipientName: user.name,
+            recipientName: user.lastName ? `${user.name} ${user.lastName}` : user.name,
             weekDate: weekDate,
             responsiblePeople: responsiblePeople,
             room: nextRoom.name,
@@ -248,14 +248,14 @@ export async function POST(request: NextRequest) {
             adminEmail: 'arbes@virtuex.cz'
           };
 
-          console.log(`Sending reminder to ${user.email} (${user.name}) for Floor ${floor.number} - ${nextRoom.name} (${weekDate})`);
+          console.log(`Sending reminder to ${user.email} (${user.lastName ? `${user.name} ${user.lastName}` : user.name}) for Floor ${floor.number} - ${nextRoom.name} (${weekDate})`);
           
           const success = await sendCleaningReminderEmail(emailData);
           
           results.push({
             floor: floor.name,
             room: nextRoom.name,
-            user: user.name,
+            user: user.lastName ? `${user.name} ${user.lastName}` : user.name,
             email: user.email,
             period: nextPeriod,
             success: success

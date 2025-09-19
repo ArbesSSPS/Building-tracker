@@ -15,7 +15,8 @@ import {
   RefreshCw,
   Menu,
   X,
-  Sparkles
+  Sparkles,
+  Key
 } from 'lucide-react'
 import { BuildingStats, Presence } from '@/types'
 import Button from './ui/Button'
@@ -30,6 +31,11 @@ export default function Dashboard() {
   const [refreshing, setRefreshing] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [alarmCode, setAlarmCode] = useState<string | null>(null)
+  const [showAlarmCode, setShowAlarmCode] = useState(false)
+
+  const getDisplayName = (name: string, lastName?: string | null) => {
+    return lastName ? `${name} ${lastName}` : name
+  }
 
   useEffect(() => {
     if (session) {
@@ -153,7 +159,7 @@ export default function Dashboard() {
                   Sledování budovy
                 </h1>
                 <p className="text-gray-600 hidden sm:block">
-                  Vítejte, {session.user.name}
+                  Vítejte, {getDisplayName(session.user.name, session.user.lastName)}
                 </p>
               </div>
             </div>
@@ -235,7 +241,7 @@ export default function Dashboard() {
                 <div className="space-y-3">
                   <div className="px-2 py-1">
                     <p className="text-sm text-gray-600">
-                      Vítejte, {session.user.name}
+                      Vítejte, {getDisplayName(session.user.name, session.user.lastName)}
                     </p>
                   </div>
                   
@@ -313,7 +319,7 @@ export default function Dashboard() {
         <div className="w-full max-w-4xl space-y-8">
           {/* Stats Cards */}
           <motion.div
-            className="grid grid-cols-1 md:grid-cols-2 gap-6"
+            className={`grid grid-cols-1 gap-6 ${alarmCode ? 'md:grid-cols-3' : 'md:grid-cols-2'}`}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.1 }}
@@ -347,6 +353,38 @@ export default function Dashboard() {
                 </div>
               </div>
             </Card>
+
+            {alarmCode && (
+              <Card className="p-6 cursor-pointer hover:bg-gray-50 transition-colors" onClick={() => setShowAlarmCode(!showAlarmCode)}>
+                <div className="flex items-center space-x-4">
+                  <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
+                    <Key className="w-6 h-6 text-purple-600" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-gray-600">Kód od alarmu</p>
+                    <div className="relative">
+                      {showAlarmCode ? (
+                        <p className="text-3xl font-mono font-bold text-gray-900 tracking-widest">
+                          {alarmCode}
+                        </p>
+                      ) : (
+                        <div className="relative">
+                          <p className="text-3xl font-mono font-bold text-gray-900 tracking-widest filter blur-md select-none">
+                            {alarmCode}
+                          </p>
+                          <div className="absolute inset-0 flex items-center justify-center">
+                            <div className="bg-white/90 backdrop-blur-sm px-4 py-2 rounded-xl text-sm text-gray-600 font-medium shadow-sm border border-gray-200">
+                              Kliknutím se zobrazí
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                    <p className="text-sm text-gray-500">4 číslice</p>
+                  </div>
+                </div>
+              </Card>
+            )}
           </motion.div>
 
           {/* Current Status */}
@@ -406,7 +444,7 @@ export default function Dashboard() {
                 className="w-full h-16 text-lg font-semibold"
               >
                 <CheckCircle className="w-6 h-6" />
-                {alarmCode ? `Jsem zde (${alarmCode})` : 'Jsem zde'}
+                Jsem zde
               </Button>
             )}
           </motion.div>

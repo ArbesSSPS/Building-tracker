@@ -112,7 +112,9 @@ export async function GET() {
     workSessions.sort((a, b) => {
       const timeCompare = new Date(b.checkIn.timestamp).getTime() - new Date(a.checkIn.timestamp).getTime()
       if (timeCompare !== 0) return timeCompare
-      return a.user.name.localeCompare(b.user.name)
+      const aName = a.user.lastName ? `${a.user.name} ${a.user.lastName}` : a.user.name
+      const bName = b.user.lastName ? `${b.user.name} ${b.user.lastName}` : b.user.name
+      return aName.localeCompare(bName)
     })
 
     // Persist penalties for late uncheckouts (after 23:30)

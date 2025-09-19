@@ -27,6 +27,10 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
   const pathname = usePathname()
   const { data: session } = useSession()
 
+  const getDisplayName = (name: string, lastName?: string | null) => {
+    return lastName ? `${name} ${lastName}` : name
+  }
+
   const menuItems = [
     { id: 'dashboard', name: 'Přehled', icon: Home, path: '/' },
     { id: 'cleaning', name: 'Úklid', icon: Sparkles, path: '/cleaning' },
@@ -86,7 +90,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                     <Users className="w-5 h-5 text-gray-600" />
                   </div>
                   <div>
-                    <p className="font-medium text-gray-900">{session?.user?.name}</p>
+                    <p className="font-medium text-gray-900">{getDisplayName(session?.user?.name || '', session?.user?.lastName)}</p>
                     <p className="text-sm text-gray-500">{session?.user?.email}</p>
                     {session?.user?.room && (
                       <p className="text-xs text-gray-400 flex items-center">

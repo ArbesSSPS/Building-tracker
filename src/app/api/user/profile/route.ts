@@ -22,6 +22,7 @@ export async function GET() {
               select: {
                 id: true,
                 name: true,
+                lastName: true,
                 email: true
               }
             }
@@ -37,6 +38,7 @@ export async function GET() {
     return NextResponse.json({
       id: user.id,
       name: user.name,
+      lastName: user.lastName,
       email: user.email,
       room: user.room ? {
         id: user.room.id,

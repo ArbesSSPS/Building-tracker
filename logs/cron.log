@@ -1,0 +1,12 @@
+[2025-09-19T17:31:55.839Z] Starting weekly cleaning reminders...
+[2025-09-19T17:31:55.839Z] Warning: Today is not Sunday (day 5), but continuing anyway...
+[2025-09-19T17:31:55.839Z] ✅ Weekly reminders sent successfully!
+[2025-09-19T17:31:55.839Z] Total sent: 5
+[2025-09-19T17:31:55.839Z] Total failed: 0
+[2025-09-19T17:31:55.839Z] Results:
+[2025-09-19T17:31:55.839Z]   ✅ Jan Novák (user1@example.com) - Kancelář B - 2025-W38
+[2025-09-19T17:31:55.839Z]   ✅ Eva Krásná (user6@example.com) - Kancelář B - 2025-W38
+[2025-09-19T17:31:55.839Z]   ✅ jenda (jenda@example.com) - Kancelář B - 2025-W38
+[2025-09-19T17:31:55.839Z]   ✅ Martin Střední (user9@example.com) - Kancelář D - 2025-W38
+[2025-09-19T17:31:55.839Z]   ✅ Lucie Malá (user10@example.com) - 314 - 2025-W38
+[2025-09-19T17:31:58.537Z] Script completed successfully.

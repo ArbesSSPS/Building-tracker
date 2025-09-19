@@ -68,7 +68,7 @@ export async function sendCleaningReminderEmail(data: CleaningReminderData): Pro
     const mailOptions = {
       from: `"Arbesovo Náměstí" <${smtpConfig.auth.user}>`,
       to: data.recipientEmail,
-      cc: 'jajirka.kolb@gmail.com', // CC na test email
+      cc: 'arbes@virtuex.cz', // CC na admin email
       subject: `Připomínka úklidu - Arbesovo nám. 70/4 (${data.weekDate})`,
       html: htmlContent,
       text: `

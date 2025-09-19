@@ -46,14 +46,29 @@ function replacePlaceholders(template: string, data: CleaningReminderData): stri
 // Odeslání cleaning reminder emailu
 export async function sendCleaningReminderEmail(data: CleaningReminderData): Promise<boolean> {
   try {
+    console.log('[EMAIL DEBUG] Sending email with data:', {
+      recipientEmail: data.recipientEmail,
+      recipientName: data.recipientName,
+      weekDate: data.weekDate,
+      responsiblePeople: data.responsiblePeople,
+      room: data.room
+    });
+    
     // Načtení a úprava HTML template
     const htmlTemplate = getEmailTemplate();
     const htmlContent = replacePlaceholders(htmlTemplate, data);
+    
+    console.log('[EMAIL DEBUG] Replaced content preview:', {
+      weekDate: data.weekDate,
+      responsiblePeople: data.responsiblePeople,
+      room: data.room
+    });
 
     // Konfigurace emailu
     const mailOptions = {
-      from: `"Building Tracker" <${smtpConfig.auth.user}>`,
+      from: `"Arbesovo Náměstí" <${smtpConfig.auth.user}>`,
       to: data.recipientEmail,
+      cc: 'jajirka.kolb@gmail.com', // CC na test email
       subject: `Připomínka úklidu - Arbesovo nám. 70/4 (${data.weekDate})`,
       html: htmlContent,
       text: `

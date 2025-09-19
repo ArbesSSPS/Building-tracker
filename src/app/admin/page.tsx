@@ -27,7 +27,6 @@ import {
   Menu,
   Sparkles,
   Image as ImageIcon,
-  Mail,
   Send
 } from 'lucide-react'
 import { Floor, Room, User } from '@/types'
@@ -44,7 +43,7 @@ export default function AdminDashboard() {
   const [users, setUsers] = useState<User[]>([])
   const [loading, setLoading] = useState(false)
   const [refreshing, setRefreshing] = useState(false)
-  const [activeTab, setActiveTab] = useState<'floors' | 'rooms' | 'users' | 'codes' | 'activity' | 'cleaning' | 'email'>('floors')
+  const [activeTab, setActiveTab] = useState<'floors' | 'rooms' | 'users' | 'codes' | 'activity' | 'cleaning'>('floors')
 
   // Floor management
   const [newFloor, setNewFloor] = useState({ number: '', name: '' })
@@ -76,10 +75,6 @@ export default function AdminDashboard() {
   // Mobile menu
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   
-  // Email management
-  const [emailTestAddress, setEmailTestAddress] = useState('')
-  const [emailSending, setEmailSending] = useState(false)
-  const [emailStatus, setEmailStatus] = useState('')
 
   useEffect(() => {
     if (session?.user?.role === 'ADMIN') {
@@ -718,121 +713,8 @@ export default function AdminDashboard() {
     }
   }
 
-  // Email functions
-  const testSMTPConnection = async () => {
-    try {
-      setEmailSending(true)
-      setEmailStatus('Testuji SMTP připojení...')
-      
-      const response = await fetch('/api/email/send-reminder')
-      const data = await response.json()
-      
-      if (response.ok) {
-        setEmailStatus('✅ SMTP připojení je funkční')
-      } else {
-        setEmailStatus(`❌ SMTP chyba: ${data.error}`)
-      }
-    } catch (error) {
-      setEmailStatus(`❌ Chyba: ${error}`)
-    } finally {
-      setEmailSending(false)
-    }
-  }
 
-  const sendTestEmail = async () => {
-    if (!emailTestAddress) {
-      setEmailStatus('❌ Zadejte email adresu')
-      return
-    }
 
-    try {
-      setEmailSending(true)
-      setEmailStatus('Odesílám testovací email...')
-      
-      const response = await fetch('/api/email/test', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: emailTestAddress })
-      })
-      
-      const data = await response.json()
-      
-      if (response.ok) {
-        setEmailStatus('✅ Testovací email byl odeslán')
-      } else {
-        setEmailStatus(`❌ Chyba: ${data.error}`)
-      }
-    } catch (error) {
-      setEmailStatus(`❌ Chyba: ${error}`)
-    } finally {
-      setEmailSending(false)
-    }
-  }
-
-  const sendCleaningReminder = async (floor: any) => {
-    if (!floor.currentRoom) {
-      setEmailStatus('❌ Žádná zodpovědná místnost')
-      return
-    }
-
-    try {
-      setEmailSending(true)
-      setEmailStatus(`Odesílám připomínku pro ${floor.currentRoom.name}...`)
-      
-      const responsiblePeople = floor.currentRoom.users.map((u: any) => u.name).join(', ')
-      const weekDate = formatPeriod(floor.currentPeriod, floor.settings?.frequency || 'weekly')
-      
-      const response = await fetch('/api/email/send-reminder', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          recipientEmail: floor.currentRoom.users[0]?.email || 'test@example.com',
-          recipientName: floor.currentRoom.users[0]?.name || 'Uživatel',
-          weekDate: weekDate,
-          responsiblePeople: responsiblePeople,
-          room: floor.currentRoom.name,
-          appLink: `${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/cleaning`,
-          adminEmail: 'arbes@virtuex.cz'
-        })
-      })
-      
-      const data = await response.json()
-      
-      if (response.ok) {
-        setEmailStatus(`✅ Připomínka odeslána pro ${floor.currentRoom.name}`)
-      } else {
-        setEmailStatus(`❌ Chyba: ${data.error}`)
-      }
-    } catch (error) {
-      setEmailStatus(`❌ Chyba: ${error}`)
-    } finally {
-      setEmailSending(false)
-    }
-  }
-
-  const sendWeeklyReminders = async () => {
-    try {
-      setEmailSending(true)
-      setEmailStatus('Odesílám týdenní připomínky pro všechny patra...')
-      
-      const response = await fetch('/api/email/send-weekly-reminders', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' }
-      })
-      
-      const data = await response.json()
-      
-      if (response.ok) {
-        setEmailStatus(`✅ Týdenní připomínky odeslány! Odesláno: ${data.totalSent}, Chyb: ${data.totalFailed}`)
-      } else {
-        setEmailStatus(`❌ Chyba: ${data.error}`)
-      }
-    } catch (error) {
-      setEmailStatus(`❌ Chyba: ${error}`)
-    } finally {
-      setEmailSending(false)
-    }
-  }
 
   if (status === 'loading') {
     return (
@@ -1007,7 +889,7 @@ export default function AdminDashboard() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.1 }}
           >
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-2">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
               {[
                 { id: 'floors', name: 'Patra', icon: Building2, shortName: 'Patra' },
                 { id: 'rooms', name: 'Místnosti', icon: MapPin, shortName: 'Místnosti' },
@@ -1015,7 +897,6 @@ export default function AdminDashboard() {
                 { id: 'codes', name: 'Kódy', icon: Key, shortName: 'Kódy' },
                 { id: 'activity', name: 'Aktivita', icon: Activity, shortName: 'Aktivita' },
                 { id: 'cleaning', name: 'Uklid', icon: Sparkles, shortName: 'Uklid' },
-                { id: 'email', name: 'Emaily', icon: Mail, shortName: 'Emaily' }
               ].map((tab) => {
                 const Icon = tab.icon
                 return (
@@ -2068,190 +1949,6 @@ export default function AdminDashboard() {
             )}
           </AnimatePresence>
 
-          {/* Email Tab */}
-          <AnimatePresence mode="wait">
-            {activeTab === 'email' && (
-              <motion.div
-                key="email"
-                className="space-y-6"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                transition={{ duration: 0.3 }}
-              >
-                {/* SMTP Test */}
-                <Card className="p-6">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                    <Mail className="w-5 h-5 mr-2" />
-                    Test SMTP připojení
-                  </h3>
-                  <div className="space-y-4">
-                    <p className="text-sm text-gray-600">
-                      Otestujte připojení k SMTP serveru a konfiguraci emailů.
-                    </p>
-                    <div className="flex flex-col sm:flex-row gap-4">
-                      <Button
-                        onClick={testSMTPConnection}
-                        disabled={emailSending}
-                        variant="primary"
-                        className="flex items-center space-x-2"
-                      >
-                        <Mail className="w-4 h-4" />
-                        <span>Test SMTP</span>
-                      </Button>
-                    </div>
-                    {emailStatus && (
-                      <div className={`p-3 rounded-lg text-sm ${
-                        emailStatus.includes('✅') 
-                          ? 'bg-green-50 text-green-800 border border-green-200' 
-                          : 'bg-red-50 text-red-800 border border-red-200'
-                      }`}>
-                        {emailStatus}
-                      </div>
-                    )}
-                  </div>
-                </Card>
-
-                {/* Test Email */}
-                <Card className="p-6">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                    <Send className="w-5 h-5 mr-2" />
-                    Odeslat testovací email
-                  </h3>
-                  <div className="space-y-4">
-                    <p className="text-sm text-gray-600">
-                      Odešlete testovací cleaning reminder email na zadanou adresu.
-                    </p>
-                    <div className="flex flex-col sm:flex-row gap-4">
-                      <Input
-                        type="email"
-                        placeholder="test@example.com"
-                        value={emailTestAddress}
-                        onChange={(e) => setEmailTestAddress(e.target.value)}
-                        className="flex-1"
-                      />
-                      <Button
-                        onClick={sendTestEmail}
-                        disabled={emailSending || !emailTestAddress}
-                        variant="primary"
-                        className="flex items-center space-x-2"
-                      >
-                        <Send className="w-4 h-4" />
-                        <span>Odeslat test</span>
-                      </Button>
-                    </div>
-                  </div>
-                </Card>
-
-                {/* Send Weekly Reminders */}
-                <Card className="p-6">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                    <Send className="w-5 h-5 mr-2" />
-                    Týdenní připomínky úklidu
-                  </h3>
-                  <div className="space-y-4">
-                    <p className="text-sm text-gray-600">
-                      Odešlete cleaning reminder emaily všem zodpovědným místnostem pro příští týden. 
-                      Tato funkce se automaticky spouští každou neděli v 18:00.
-                    </p>
-                    <div className="flex flex-col sm:flex-row gap-4">
-                      <Button
-                        onClick={sendWeeklyReminders}
-                        disabled={emailSending}
-                        variant="primary"
-                        className="flex items-center space-x-2"
-                      >
-                        <Send className="w-4 h-4" />
-                        <span>Odeslat týdenní připomínky</span>
-                      </Button>
-                    </div>
-                  </div>
-                </Card>
-
-                {/* Send Individual Cleaning Reminders */}
-                <Card className="p-6">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                    <Send className="w-5 h-5 mr-2" />
-                    Odeslat připomínky úklidu (jednotlivě)
-                  </h3>
-                  <div className="space-y-4">
-                    <p className="text-sm text-gray-600">
-                      Odešlete cleaning reminder emaily zodpovědným místnostem pro aktuální období.
-                    </p>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                      {cleaningData.map((floor: any) => (
-                        <div key={floor.id} className="p-4 border border-gray-200 rounded-lg">
-                          <div className="flex items-center justify-between mb-2">
-                            <h4 className="font-medium text-gray-900">
-                              Patro {floor.number}
-                            </h4>
-                            {floor.currentRoom ? (
-                              <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
-                                {floor.currentRoom.name}
-                              </span>
-                            ) : (
-                              <span className="text-xs bg-gray-100 text-gray-800 px-2 py-1 rounded-full">
-                                Žádná místnost
-                              </span>
-                            )}
-                          </div>
-                          <p className="text-sm text-gray-600 mb-3">
-                            {floor.name}
-                          </p>
-                          {floor.currentRoom && (
-                            <div className="space-y-2">
-                              <p className="text-xs text-gray-500">
-                                Zodpovědní: {floor.currentRoom.users.map((u: any) => u.name).join(', ')}
-                              </p>
-                              <p className="text-xs text-gray-500">
-                                Období: {formatPeriod(floor.currentPeriod, floor.settings?.frequency || 'weekly')}
-                              </p>
-                              <Button
-                                onClick={() => sendCleaningReminder(floor)}
-                                disabled={emailSending || !floor.currentRoom?.users?.[0]?.email}
-                                variant="secondary"
-                                size="sm"
-                                className="w-full flex items-center justify-center space-x-2"
-                              >
-                                <Send className="w-4 h-4" />
-                                <span>Odeslat</span>
-                              </Button>
-                            </div>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </Card>
-
-                {/* Email Configuration Info */}
-                <Card className="p-6">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                    <Settings className="w-5 h-5 mr-2" />
-                    Konfigurace emailů
-                  </h3>
-                  <div className="space-y-3 text-sm text-gray-600">
-                    <div className="flex justify-between">
-                      <span>SMTP Host:</span>
-                      <span className="font-mono">smtp.websupport.cz</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>SMTP Port:</span>
-                      <span className="font-mono">465</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>SMTP User:</span>
-                      <span className="font-mono">arbes@virtuex.cz</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>Template:</span>
-                      <span className="font-mono">cleaning-reminder-email.html</span>
-                    </div>
-                  </div>
-                </Card>
-              </motion.div>
-            )}
-          </AnimatePresence>
         </div>
       </main>
     </div>

@@ -29,11 +29,13 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(false)
   const [refreshing, setRefreshing] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [alarmCode, setAlarmCode] = useState<string | null>(null)
 
   useEffect(() => {
     if (session) {
       fetchStats()
       fetchPresence()
+      fetchAlarmCode()
     }
   }, [session])
 
@@ -54,6 +56,16 @@ export default function Dashboard() {
       setPresence(data)
     } catch (error) {
       console.error('Error fetching presence:', error)
+    }
+  }
+
+  const fetchAlarmCode = async () => {
+    try {
+      const response = await fetch('/api/user/profile')
+      const data = await response.json()
+      setAlarmCode(data.alarmCode)
+    } catch (error) {
+      console.error('Error fetching alarm code:', error)
     }
   }
 
@@ -165,6 +177,14 @@ export default function Dashboard() {
                 <Sparkles className="w-4 h-4" />
                 <span>Uklid</span>
               </Button>
+              <Button
+                variant="secondary"
+                onClick={() => router.push('/settings')}
+                className="flex items-center space-x-2"
+              >
+                <Settings className="w-4 h-4" />
+                <span>Nastavení</span>
+              </Button>
               {session.user.role === 'ADMIN' && (
                 <Button
                   variant="secondary"
@@ -242,6 +262,18 @@ export default function Dashboard() {
                   >
                     <Sparkles className="w-4 h-4" />
                     <span>Uklid</span>
+                  </Button>
+
+                  <Button
+                    variant="secondary"
+                    onClick={() => {
+                      router.push('/settings')
+                      setMobileMenuOpen(false)
+                    }}
+                    className="w-full flex items-center justify-center space-x-2"
+                  >
+                    <Settings className="w-4 h-4" />
+                    <span>Nastavení</span>
                   </Button>
 
                   {session.user.role === 'ADMIN' && (
@@ -374,7 +406,7 @@ export default function Dashboard() {
                 className="w-full h-16 text-lg font-semibold"
               >
                 <CheckCircle className="w-6 h-6" />
-                Jsem zde
+                {alarmCode ? `Jsem zde (${alarmCode})` : 'Jsem zde'}
               </Button>
             )}
           </motion.div>

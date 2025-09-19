@@ -62,7 +62,9 @@ export async function POST(request: NextRequest) {
           name,
           email,
           password: hashedPassword,
-          role: 'USER'
+          role: 'USER',
+          // If the code was created by a user (has roomId in usedBy), assign to that room
+          roomId: registrationCode.usedBy && registrationCode.usedBy.length === 25 ? registrationCode.usedBy : null
         }
       })
 

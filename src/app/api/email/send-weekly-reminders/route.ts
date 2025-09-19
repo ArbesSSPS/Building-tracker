@@ -174,38 +174,41 @@ export async function POST(request: NextRequest) {
         continue;
       }
 
-      // Send email to all users in the responsible room
-      for (const user of nextRoom.users) {
-        if (!user.email) {
-          console.log(`User ${user.name} has no email, skipping...`);
-          continue;
-        }
-
+      // Send email to ALL responsible users for this floor
+      if (nextRoom.users && nextRoom.users.length > 0) {
         const responsiblePeople = nextRoom.users.map(u => u.name).join(', ');
         const weekDate = formatPeriod(nextPeriod, frequency);
         
-        const emailData: CleaningReminderData = {
-          recipientEmail: user.email,
-          recipientName: user.name,
-          weekDate: weekDate,
-          responsiblePeople: responsiblePeople,
-          room: nextRoom.name,
-          appLink: `${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/cleaning`,
-          adminEmail: 'arbes@virtuex.cz'
-        };
+        // Send individual email to each responsible user
+        for (const user of nextRoom.users) {
+          if (!user.email) {
+            console.log(`User ${user.name} has no email, skipping...`);
+            continue;
+          }
+          
+          const emailData: CleaningReminderData = {
+            recipientEmail: user.email,
+            recipientName: user.name,
+            weekDate: weekDate,
+            responsiblePeople: responsiblePeople,
+            room: nextRoom.name,
+            appLink: `${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/cleaning`,
+            adminEmail: 'arbes@virtuex.cz'
+          };
 
-        console.log(`Sending reminder to ${user.email} for ${nextRoom.name} (${weekDate})`);
-        
-        const success = await sendCleaningReminderEmail(emailData);
-        
-        results.push({
-          floor: floor.name,
-          room: nextRoom.name,
-          user: user.name,
-          email: user.email,
-          period: nextPeriod,
-          success: success
-        });
+          console.log(`Sending reminder to ${user.email} (${user.name}) for Floor ${floor.number} - ${nextRoom.name} (${weekDate})`);
+          
+          const success = await sendCleaningReminderEmail(emailData);
+          
+          results.push({
+            floor: floor.name,
+            room: nextRoom.name,
+            user: user.name,
+            email: user.email,
+            period: nextPeriod,
+            success: success
+          });
+        }
       }
     }
 

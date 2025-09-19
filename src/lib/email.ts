@@ -9,12 +9,12 @@ const smtpConfig = {
   secure: true, // true pro port 465, false pro ostatní porty
   auth: {
     user: process.env.SMTP_USER || 'arbes@virtuex.cz',
-    pass: process.env.SMTP_PASS || '',
+    pass: process.env.SMTP_PASS || '|S1NkY[+L]AoeR.ygYxP',
   },
 };
 
 // Vytvoření transporteru
-const transporter = nodemailer.createTransporter(smtpConfig);
+const transporter = nodemailer.createTransport(smtpConfig);
 
 // Interface pro cleaning reminder data
 export interface CleaningReminderData {
@@ -52,7 +52,7 @@ export async function sendCleaningReminderEmail(data: CleaningReminderData): Pro
 
     // Konfigurace emailu
     const mailOptions = {
-      from: `"Building Tracker" <${process.env.SMTP_USER}>`,
+      from: `"Building Tracker" <${smtpConfig.auth.user}>`,
       to: data.recipientEmail,
       subject: `Připomínka úklidu - Arbesovo nám. 70/4 (${data.weekDate})`,
       html: htmlContent,

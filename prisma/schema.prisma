@@ -1,0 +1,152 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String        @id @default(cuid())
+  email         String        @unique
+  name          String
+  password      String
+  role          UserRole      @default(USER)
+  roomId        String?
+  room          Room?         @relation(fields: [roomId], references: [id])
+  presence      Presence?
+  activityLogs  ActivityLog[]
+  cleaningRecords CleaningRecord[]
+  penalties     UncheckoutPenalty[]
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  @@map("users")
+}
+
+model Floor {
+  id          String @id @default(cuid())
+  number      Int    @unique
+  name        String
+  rooms       Room[]
+  cleaningSettings CleaningSettings?
+  cleaningRotations CleaningRotation[]
+  cleaningRecords CleaningRecord[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("floors")
+}
+
+model Room {
+  id        String   @id @default(cuid())
+  name      String
+  floorId   String
+  floor     Floor    @relation(fields: [floorId], references: [id])
+  users     User[]
+  cleaningRotations CleaningRotation[]
+  cleaningRecords CleaningRecord[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("rooms")
+}
+
+model Presence {
+  id        String      @id @default(cuid())
+  userId    String      @unique
+  user      User        @relation(fields: [userId], references: [id])
+  isPresent Boolean     @default(false)
+  lastSeen  DateTime    @default(now())
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+
+  @@map("presence")
+}
+
+model ActivityLog {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  action    String   // "check_in" or "check_out"
+  timestamp DateTime @default(now())
+  createdAt DateTime @default(now())
+
+  @@map("activity_logs")
+}
+
+model UncheckoutPenalty {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  date      DateTime // den, za který vznikl trestný bod (lokální den)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, date])
+  @@map("uncheckout_penalties")
+}
+
+model CleaningSettings {
+  id                String   @id @default(cuid())
+  floorId           String   @unique
+  floor             Floor    @relation(fields: [floorId], references: [id])
+  frequency         String   // "weekly", "biweekly", "monthly"
+  pendingFrequency  String?  // "weekly", "biweekly", "monthly" - will be applied at end of current period
+  pendingFromPeriod String?  // Period when the change will take effect
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@map("cleaning_settings")
+}
+
+model CleaningRotation {
+  id        String   @id @default(cuid())
+  floorId   String
+  floor     Floor    @relation(fields: [floorId], references: [id])
+  roomId    String
+  room      Room     @relation(fields: [roomId], references: [id])
+  order     Int      // Pořadí v rotaci
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([floorId, roomId])
+  @@map("cleaning_rotations")
+}
+
+model CleaningRecord {
+  id        String   @id @default(cuid())
+  floorId   String
+  floor     Floor    @relation(fields: [floorId], references: [id])
+  roomId    String
+  room      Room     @relation(fields: [roomId], references: [id])
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  photos    String   // JSON string of photo URLs
+  completedAt DateTime @default(now())
+  period    String   // "2024-W01", "2024-W02", "2024-M01", etc.
+  createdAt DateTime @default(now())
+
+  @@map("cleaning_records")
+}
+
+model RegistrationCode {
+  id        String   @id @default(cuid())
+  code      String   @unique
+  isUsed    Boolean  @default(false)
+  usedBy    String?
+  usedAt    DateTime?
+  expiresAt DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("registration_codes")
+}
+
+enum UserRole {
+  USER
+  ADMIN
+}

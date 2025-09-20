@@ -1411,16 +1411,6 @@ export default function AdminDashboard() {
                         <div className="flex flex-row flex-wrap items-start justify-between gap-3">
                           <div className="flex-1">
                             <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-4 gap-2">
-                              <div>
-                                <h4 className="text-sm font-semibold text-gray-900">
-                                  {getDisplayName(session.user.name, session.user.lastName)}
-                                </h4>
-                                <p className="text-xs text-gray-500">
-                                  {session.user.room?.name || 'Nepřiřazeno'} 
-                                  {session.user.room?.floor && ` • Patro ${session.user.room.floor.number}`}
-                                </p>
-                              </div>
-                              
                               <div className="flex items-center space-x-2">
                                 <Calendar className="w-4 h-4 text-gray-400" />
                                 <span className="text-sm font-medium text-gray-700">
@@ -1436,6 +1426,16 @@ export default function AdminDashboard() {
                                     minute: '2-digit'
                                   })}
                                 </span>
+                              </div>
+                              
+                              <div>
+                                <h4 className="text-sm font-semibold text-gray-900">
+                                  {getDisplayName(session.user.name, session.user.lastName)}
+                                </h4>
+                                <p className="text-xs text-gray-500">
+                                  {session.user.room?.name || 'Nepřiřazeno'} 
+                                  {session.user.room?.floor && ` • Patro ${session.user.room.floor.number}`}
+                                </p>
                               </div>
                             </div>
                           </div>

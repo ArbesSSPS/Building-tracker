@@ -20,6 +20,7 @@ declare module 'next-auth' {
     role: UserRole
     room?: Room
     presence?: Presence
+    rememberMe?: boolean
   }
 }
 
@@ -28,5 +29,6 @@ declare module 'next-auth/jwt' {
     role: UserRole
     room?: Room
     presence?: Presence
+    rememberMe?: boolean
   }
 }

@@ -13,6 +13,7 @@ import Card from '@/components/ui/Card'
 export default function SignIn() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [rememberMe, setRememberMe] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
   const [loading, setLoading] = useState(false)
@@ -36,6 +37,7 @@ export default function SignIn() {
       const result = await signIn('credentials', {
         email,
         password,
+        rememberMe: rememberMe.toString(),
         redirect: false
       })
 
@@ -140,6 +142,20 @@ export default function SignIn() {
                     {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                   </button>
                 </div>
+              </div>
+
+              {/* Remember Me Checkbox */}
+              <div className="flex items-center">
+                <input
+                  type="checkbox"
+                  id="rememberMe"
+                  checked={rememberMe}
+                  onChange={(e) => setRememberMe(e.target.checked)}
+                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                />
+                <label htmlFor="rememberMe" className="ml-2 block text-sm text-gray-700">
+                  Zůstat přihlášen (30 dní)
+                </label>
               </div>
 
               <AnimatePresence>

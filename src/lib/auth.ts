@@ -9,7 +9,8 @@ export const authOptions: NextAuthOptions = {
       name: 'credentials',
       credentials: {
         email: { label: 'Email', type: 'email' },
-        password: { label: 'Heslo', type: 'password' }
+        password: { label: 'Heslo', type: 'password' },
+        rememberMe: { label: 'Zůstat přihlášen', type: 'checkbox' }
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) {
@@ -50,13 +51,19 @@ export const authOptions: NextAuthOptions = {
           lastName: user.lastName,
           role: user.role,
           room: user.room,
-          presence: user.presence
+          presence: user.presence,
+          rememberMe: credentials.rememberMe === 'true'
         }
       }
     })
   ],
   session: {
-    strategy: 'jwt'
+    strategy: 'jwt',
+    maxAge: 30 * 24 * 60 * 60, // 30 dní (v sekundách)
+    updateAge: 24 * 60 * 60, // 24 hodin (v sekundách)
+  },
+  jwt: {
+    maxAge: 30 * 24 * 60 * 60, // 30 dní (v sekundách)
   },
   callbacks: {
     async jwt({ token, user }) {
@@ -64,6 +71,13 @@ export const authOptions: NextAuthOptions = {
         token.role = user.role
         token.room = user.room
         token.presence = user.presence
+        token.rememberMe = user.rememberMe
+        // Nastavíme expiraci na základě rememberMe
+        if (user.rememberMe) {
+          token.exp = Math.floor(Date.now() / 1000) + (30 * 24 * 60 * 60) // 30 dní
+        } else {
+          token.exp = Math.floor(Date.now() / 1000) + (24 * 60 * 60) // 24 hodin
+        }
       }
       return token
     },

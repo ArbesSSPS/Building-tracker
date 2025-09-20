@@ -12,7 +12,8 @@ import {
   Menu,
   X,
   Home,
-  Sparkles
+  Sparkles,
+  Crown
 } from 'lucide-react'
 import { useSession, signOut } from 'next-auth/react'
 import Button from './ui/Button'
@@ -129,7 +130,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
               </nav>
 
               {/* Admin Link */}
-              {(session?.user?.role === 'ADMIN' || session?.user?.role === 'SUPERADMIN') && (
+              {session?.user?.role === 'ADMIN' && (
                 <div className="p-4 border-t border-gray-200">
                   <Button
                     variant="secondary"
@@ -138,6 +139,19 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                   >
                     <Settings className="w-5 h-5" />
                     <span>Administrace</span>
+                  </Button>
+                </div>
+              )}
+              {/* Superadmin Link */}
+              {session?.user?.role === 'SUPERADMIN' && (
+                <div className="p-4 border-t border-gray-200">
+                  <Button
+                    variant="secondary"
+                    onClick={() => handleNavigation('/superadmin')}
+                    className="w-full flex items-center space-x-3"
+                  >
+                    <Crown className="w-5 h-5" />
+                    <span>Superadmin</span>
                   </Button>
                 </div>
               )}

@@ -203,7 +203,7 @@ export default function Dashboard() {
                 <Settings className="w-4 h-4" />
                 <span>Nastavení</span>
               </Button>
-              {(session.user.role === 'ADMIN' || session.user.role === 'SUPERADMIN') && (
+              {session.user.role === 'ADMIN' && (
                 <Button
                   variant="secondary"
                   onClick={() => router.push('/admin')}
@@ -211,6 +211,16 @@ export default function Dashboard() {
                 >
                   <Settings className="w-4 h-4" />
                   <span>Administrace</span>
+                </Button>
+              )}
+              {session.user.role === 'SUPERADMIN' && (
+                <Button
+                  variant="secondary"
+                  onClick={() => router.push('/superadmin')}
+                  className="flex items-center space-x-2"
+                >
+                  <Crown className="w-4 h-4" />
+                  <span>Superadmin</span>
                 </Button>
               )}
               <Button
@@ -306,7 +316,7 @@ export default function Dashboard() {
                     <span>Nastavení</span>
                   </Button>
 
-                  {(session.user.role === 'ADMIN' || session.user.role === 'SUPERADMIN') && (
+                  {session.user.role === 'ADMIN' && (
                     <Button
                       variant="secondary"
                       onClick={() => {
@@ -317,6 +327,19 @@ export default function Dashboard() {
                     >
                       <Settings className="w-4 h-4" />
                       <span>Administrace</span>
+                    </Button>
+                  )}
+                  {session.user.role === 'SUPERADMIN' && (
+                    <Button
+                      variant="secondary"
+                      onClick={() => {
+                        router.push('/superadmin')
+                        setMobileMenuOpen(false)
+                      }}
+                      className="w-full flex items-center justify-center space-x-2"
+                    >
+                      <Crown className="w-4 h-4" />
+                      <span>Superadmin</span>
                     </Button>
                   )}
                   

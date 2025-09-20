@@ -16,7 +16,8 @@ import {
   Menu,
   X,
   Sparkles,
-  Key
+  Key,
+  Crown
 } from 'lucide-react'
 import { BuildingStats, Presence } from '@/types'
 import Button from './ui/Button'

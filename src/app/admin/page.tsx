@@ -553,6 +553,30 @@ export default function AdminDashboard() {
     }
   }
 
+  const handleDeleteUser = async (userId: string, userName: string) => {
+    if (!confirm(`Opravdu chcete smazat uživatele "${userName}"? Tato akce je nevratná a smaže všechny související data.`)) {
+      return
+    }
+
+    try {
+      const response = await fetch(`/api/admin/users?id=${userId}`, {
+        method: 'DELETE'
+      })
+
+      if (response.ok) {
+        const result = await response.json()
+        alert(result.message)
+        fetchData()
+      } else {
+        const error = await response.json()
+        alert(`Chyba při mazání uživatele: ${error.error}`)
+      }
+    } catch (error) {
+      console.error('Error deleting user:', error)
+      alert('Chyba při mazání uživatele')
+    }
+  }
+
   const handleEditRoom = (room: Room) => {
     setEditingRoom(room)
     setEditRoom({ name: room.name, floorId: room.floorId })
@@ -1253,6 +1277,16 @@ export default function AdminDashboard() {
                                 </option>
                               ))}
                             </select>
+                            <Button
+                              variant="danger"
+                              size="sm"
+                              onClick={() => handleDeleteUser(user.id, getDisplayName(user.name, user.lastName))}
+                              className="flex-1 sm:flex-none"
+                              title="Smazat uživatele"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                              <span className="sm:hidden ml-2">Smazat</span>
+                            </Button>
                           </div>
                         </div>
                       </motion.div>

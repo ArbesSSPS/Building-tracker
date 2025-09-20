@@ -29,16 +29,34 @@ export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
     
-    if (!session?.user?.id || session.user.role !== 'ADMIN') {
+    // Only ADMIN and SUPERADMIN can generate codes
+    if (!session?.user?.id || !['ADMIN', 'SUPERADMIN'].includes(session.user.role)) {
       return NextResponse.json({ error: 'Neautorizováno' }, { status: 401 })
     }
 
-    const { count = 1, expiresInDays } = await request.json()
+    const { count = 1, expiresInDays, role = 'USER' } = await request.json()
 
     if (count < 1 || count > 50) {
       return NextResponse.json(
         { error: 'Počet kódů musí být mezi 1 a 50' },
         { status: 400 }
+      )
+    }
+
+    // Validate role
+    const validRoles = ['USER', 'ADMIN', 'SUPERADMIN']
+    if (!validRoles.includes(role)) {
+      return NextResponse.json(
+        { error: 'Neplatná role. Povolené role: USER, ADMIN, SUPERADMIN' },
+        { status: 400 }
+      )
+    }
+
+    // Only SUPERADMIN can generate SUPERADMIN codes
+    if (role === 'SUPERADMIN' && session.user.role !== 'SUPERADMIN') {
+      return NextResponse.json(
+        { error: 'Pouze superadmin může generovat superadmin kódy' },
+        { status: 403 }
       )
     }
 
@@ -50,6 +68,7 @@ export async function POST(request: NextRequest) {
       const registrationCode = await prisma.registrationCode.create({
         data: {
           code,
+          role,
           expiresAt
         }
       })

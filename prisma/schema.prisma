@@ -138,6 +138,7 @@ model CleaningRecord {
 model RegistrationCode {
   id        String   @id @default(cuid())
   code      String   @unique
+  role      UserRole @default(USER)
   isUsed    Boolean  @default(false)
   usedBy    String?
   usedAt    DateTime?
@@ -151,4 +152,5 @@ model RegistrationCode {
 enum UserRole {
   USER
   ADMIN
+  SUPERADMIN
 }

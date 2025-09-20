@@ -15,7 +15,8 @@ export async function POST(request: NextRequest) {
 
     // Validate registration code
     const registrationCode = await prisma.registrationCode.findUnique({
-      where: { code }
+      where: { code },
+      include: { role: true }
     })
 
     if (!registrationCode) {
@@ -63,7 +64,7 @@ export async function POST(request: NextRequest) {
           lastName: lastName || null,
           email,
           password: hashedPassword,
-          role: 'USER',
+          role: registrationCode.role,
           // If the code was created by a user (has roomId in usedBy), assign to that room
           roomId: registrationCode.usedBy && registrationCode.usedBy.length === 25 ? registrationCode.usedBy : null
         }

@@ -67,7 +67,12 @@ export default function AdminDashboard() {
   const [codes, setCodes] = useState<any[]>([])
   const [newCodeCount, setNewCodeCount] = useState(1)
   const [newCodeExpires, setNewCodeExpires] = useState(30)
+  const [newCodeRole, setNewCodeRole] = useState('USER')
   const [copiedCode, setCopiedCode] = useState<string | null>(null)
+  
+  // Role management
+  const [editingUser, setEditingUser] = useState<any>(null)
+  const [showRoleModal, setShowRoleModal] = useState(false)
   
   // Activity management
   const [workSessions, setWorkSessions] = useState<any[]>([])
@@ -577,6 +582,35 @@ export default function AdminDashboard() {
     }
   }
 
+  const handleEditUserRole = (user: any) => {
+    setEditingUser(user)
+    setShowRoleModal(true)
+  }
+
+  const handleUpdateUserRole = async (userId: string, newRole: string) => {
+    try {
+      const response = await fetch('/api/admin/users/role', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId, role: newRole })
+      })
+
+      if (response.ok) {
+        const result = await response.json()
+        alert(result.message)
+        fetchData()
+        setShowRoleModal(false)
+        setEditingUser(null)
+      } else {
+        const error = await response.json()
+        alert(`Chyba při změně role: ${error.error}`)
+      }
+    } catch (error) {
+      console.error('Error updating user role:', error)
+      alert('Chyba při změně role uživatele')
+    }
+  }
+
   const handleEditRoom = (room: Room) => {
     setEditingRoom(room)
     setEditRoom({ name: room.name, floorId: room.floorId })
@@ -701,17 +735,23 @@ export default function AdminDashboard() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           count: newCodeCount,
-          expiresInDays: newCodeExpires
+          expiresInDays: newCodeExpires,
+          role: newCodeRole
         })
       })
 
       if (response.ok) {
         setNewCodeCount(1)
         setNewCodeExpires(30)
+        setNewCodeRole('USER')
         fetchData()
+      } else {
+        const error = await response.json()
+        alert(`Chyba při generování kódů: ${error.error}`)
       }
     } catch (error) {
       console.error('Error generating codes:', error)
+      alert('Chyba při generování kódů')
     }
   }
 
@@ -1288,6 +1328,18 @@ export default function AdminDashboard() {
                                 </option>
                               ))}
                             </select>
+                            {session?.user?.role === 'SUPERADMIN' && (
+                              <Button
+                                variant="secondary"
+                                size="sm"
+                                onClick={() => handleEditUserRole(user)}
+                                className="flex-1 sm:flex-none"
+                                title="Změnit roli uživatele"
+                              >
+                                <Settings className="w-4 h-4" />
+                                <span className="sm:hidden ml-2">Role</span>
+                              </Button>
+                            )}
                             <Button
                               variant="danger"
                               size="sm"
@@ -1324,7 +1376,7 @@ export default function AdminDashboard() {
                     <Plus className="w-5 h-5 mr-2" />
                     Generovat nové kódy
                   </h3>
-                  <form onSubmit={handleGenerateCodes} className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <form onSubmit={handleGenerateCodes} className="grid grid-cols-1 md:grid-cols-4 gap-4">
                     <div className="flex flex-col">
                       <label className="text-sm text-gray-600 mb-1">Počet kódů</label>
                       <Input
@@ -1347,6 +1399,20 @@ export default function AdminDashboard() {
                         className="w-full"
                         min="1"
                       />
+                    </div>
+                    <div className="flex flex-col">
+                      <label className="text-sm text-gray-600 mb-1">Role</label>
+                      <select
+                        value={newCodeRole}
+                        onChange={(e) => setNewCodeRole(e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      >
+                        <option value="USER">USER</option>
+                        <option value="ADMIN">ADMIN</option>
+                        {session?.user?.role === 'SUPERADMIN' && (
+                          <option value="SUPERADMIN">SUPERADMIN</option>
+                        )}
+                      </select>
                     </div>
                     <div className="flex items-end">
                       <Button type="submit" variant="primary" className="w-full">
@@ -1381,6 +1447,15 @@ export default function AdminDashboard() {
                                 : 'bg-green-100 text-green-800'
                             }`}>
                               {code.isUsed ? 'Použit' : 'Dostupný'}
+                            </span>
+                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                              code.role === 'SUPERADMIN' 
+                                ? 'bg-purple-100 text-purple-800'
+                                : code.role === 'ADMIN'
+                                ? 'bg-blue-100 text-blue-800'
+                                : 'bg-gray-100 text-gray-800'
+                            }`}>
+                              {code.role}
                             </span>
                             {code.expiresAt && (
                               <span className="text-xs text-gray-500">
@@ -2000,6 +2075,69 @@ export default function AdminDashboard() {
 
         </div>
       </main>
+
+      {/* Role Change Modal */}
+      <AnimatePresence>
+        {showRoleModal && editingUser && (
+          <motion.div
+            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <motion.div
+              className="bg-white rounded-lg p-6 w-full max-w-md mx-4"
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+            >
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                Změnit roli uživatele
+              </h3>
+              <p className="text-sm text-gray-600 mb-4">
+                {getDisplayName(editingUser.name, editingUser.lastName)} ({editingUser.email})
+              </p>
+              <p className="text-sm text-gray-600 mb-4">
+                Aktuální role: <span className="font-medium">{editingUser.role}</span>
+              </p>
+              
+              <div className="space-y-3">
+                {['USER', 'ADMIN', 'SUPERADMIN'].map((role) => (
+                  <button
+                    key={role}
+                    onClick={() => handleUpdateUserRole(editingUser.id, role)}
+                    className={`w-full text-left px-4 py-2 rounded-lg border transition-colors ${
+                      editingUser.role === role
+                        ? 'bg-blue-50 border-blue-200 text-blue-700'
+                        : 'bg-gray-50 border-gray-200 text-gray-700 hover:bg-gray-100'
+                    }`}
+                    disabled={editingUser.role === role}
+                  >
+                    <div className="font-medium">{role}</div>
+                    <div className="text-xs text-gray-500">
+                      {role === 'USER' && 'Běžný uživatel'}
+                      {role === 'ADMIN' && 'Administrátor - může spravovat systém'}
+                      {role === 'SUPERADMIN' && 'Superadmin - může měnit role a generovat všechny kódy'}
+                    </div>
+                  </button>
+                ))}
+              </div>
+              
+              <div className="flex justify-end mt-6">
+                <Button
+                  variant="secondary"
+                  onClick={() => {
+                    setShowRoleModal(false)
+                    setEditingUser(null)
+                  }}
+                >
+                  Zrušit
+                </Button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }

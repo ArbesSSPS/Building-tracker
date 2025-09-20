@@ -715,8 +715,13 @@ export default function AdminDashboard() {
     }
   }
 
-  const handleDeleteCode = async (codeId: string) => {
-    if (!confirm('Opravdu chcete smazat tento kód?')) return
+  const handleDeleteCode = async (codeId: string, code: any) => {
+    const isUsed = code.isUsed
+    const message = isUsed 
+      ? `Opravdu chcete smazat použitý kód "${code.code}"? Tato akce je nevratná.`
+      : `Opravdu chcete smazat kód "${code.code}"?`
+    
+    if (!confirm(message)) return
 
     try {
       const response = await fetch(`/api/admin/codes?id=${codeId}`, {
@@ -724,10 +729,16 @@ export default function AdminDashboard() {
       })
 
       if (response.ok) {
+        const result = await response.json()
+        alert(result.message)
         fetchData()
+      } else {
+        const error = await response.json()
+        alert(`Chyba při mazání kódu: ${error.error}`)
       }
     } catch (error) {
       console.error('Error deleting code:', error)
+      alert('Chyba při mazání kódu')
     }
   }
 
@@ -1383,7 +1394,7 @@ export default function AdminDashboard() {
                             variant="secondary"
                             size="sm"
                             onClick={() => copyToClipboard(code.code)}
-                            disabled={code.isUsed}
+                            title={code.isUsed ? "Kopírovat použitý kód" : "Kopírovat kód"}
                           >
                             {copiedCode === code.code ? (
                               <Check className="w-4 h-4" />
@@ -1394,8 +1405,8 @@ export default function AdminDashboard() {
                           <Button
                             variant="danger"
                             size="sm"
-                            onClick={() => handleDeleteCode(code.id)}
-                            disabled={code.isUsed}
+                            onClick={() => handleDeleteCode(code.id, code)}
+                            title={code.isUsed ? "Smazat použitý kód" : "Smazat kód"}
                           >
                             <Trash2 className="w-4 h-4" />
                           </Button>

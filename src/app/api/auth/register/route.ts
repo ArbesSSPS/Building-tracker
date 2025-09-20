@@ -15,8 +15,7 @@ export async function POST(request: NextRequest) {
 
     // Validate registration code
     const registrationCode = await prisma.registrationCode.findUnique({
-      where: { code },
-      include: { role: true }
+      where: { code }
     })
 
     if (!registrationCode) {

@@ -43,8 +43,10 @@ export default function Dashboard() {
       fetchStats()
       fetchPresence()
       fetchAlarmCode()
+    } else if (status === 'unauthenticated') {
+      router.push('/auth/signin')
     }
-  }, [session])
+  }, [session, status, router])
 
   const fetchStats = async () => {
     try {
@@ -125,7 +127,6 @@ export default function Dashboard() {
   }
 
   if (!session) {
-    router.push('/auth/signin')
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <motion.div

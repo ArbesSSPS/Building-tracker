@@ -220,7 +220,7 @@ export default function SuperAdminDashboard() {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <RefreshCw className="w-8 h-8 animate-spin text-blue-500 mx-auto mb-4" />
+          <RefreshCw className="w-8 h-8 animate-spin text-purple-500 mx-auto mb-4" />
           <p className="text-gray-600">Načítání...</p>
         </div>
       </div>
@@ -231,7 +231,7 @@ export default function SuperAdminDashboard() {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <XCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
+          <X className="w-16 h-16 text-red-500 mx-auto mb-4" />
           <h1 className="text-2xl font-bold text-gray-900 mb-2">Přístup odepřen</h1>
           <p className="text-gray-600 mb-4">Nemáte oprávnění k přístupu k této stránce.</p>
           <Button onClick={() => router.push('/')}>
@@ -263,7 +263,7 @@ export default function SuperAdminDashboard() {
                   Superadmin Panel
                 </h1>
                 <p className="text-gray-600 hidden sm:block">
-                  Správa uživatelů a rolí
+                  Správa uživatelů a registračních kódů
                 </p>
               </div>
             </div>

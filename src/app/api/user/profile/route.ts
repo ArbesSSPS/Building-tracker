@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+import { encryptAlarmCode, decryptAlarmCode, isValidAlarmCode } from '@/lib/encryption'
 
 export async function GET() {
   try {
@@ -50,7 +51,7 @@ export async function GET() {
         },
         users: user.room.users
       } : null,
-      alarmCode: user.alarmCode || null
+      alarmCode: user.alarmCode ? decryptAlarmCode(user.alarmCode) : null
     })
   } catch (error) {
     console.error('User profile fetch error:', error)
@@ -71,15 +72,26 @@ export async function PUT(request: NextRequest) {
 
     const { alarmCode } = await request.json()
 
+    // Validate alarm code format
+    if (alarmCode && !isValidAlarmCode(alarmCode)) {
+      return NextResponse.json(
+        { error: 'Kód alarmu musí obsahovat přesně 4 číslice' },
+        { status: 400 }
+      )
+    }
+
+    // Encrypt alarm code before storing
+    const encryptedAlarmCode = alarmCode ? encryptAlarmCode(alarmCode) : null
+
     // Update user's alarm code
     const updatedUser = await prisma.user.update({
       where: { id: session.user.id },
-      data: { alarmCode }
+      data: { alarmCode: encryptedAlarmCode }
     })
 
     return NextResponse.json({
       success: true,
-      alarmCode: updatedUser.alarmCode
+      alarmCode: alarmCode // Return the original (unencrypted) code to frontend
     })
   } catch (error) {
     console.error('User profile update error:', error)

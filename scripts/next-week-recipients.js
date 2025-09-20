@@ -73,7 +73,7 @@ const req = http.request(API_URL, options, (res) => {
         console.log('   - Odpovědní lidé: [ODPOVĚDNÍ_LIDÉ] - All responsible people from the room');
         console.log('   - Místnost: [MÍSTNOST] - The room name');
         console.log('   - Odesílatel: Arbesovo Náměstí');
-        console.log('   - CC: jajirka.kolb@gmail.com');
+        console.log('   - CC: arbes@virtuex.cz');
         
       } else {
         console.log('❌ Error:', result.error || 'Unknown error');

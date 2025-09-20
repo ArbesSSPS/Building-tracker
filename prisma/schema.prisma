@@ -20,6 +20,8 @@ model User {
   roomId        String?
   room          Room?         @relation(fields: [roomId], references: [id])
   alarmCode     String?       // Kód od alarmu
+  resetToken    String?       // Token pro obnovení hesla
+  resetTokenExpires DateTime? // Expirace reset tokenu
   presence      Presence?
   activityLogs  ActivityLog[]
   cleaningRecords CleaningRecord[]

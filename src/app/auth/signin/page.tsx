@@ -186,17 +186,28 @@ export default function SignIn() {
                 )}
               </AnimatePresence>
 
-              <Button
-                type="submit"
-                variant="primary"
-                size="lg"
-                loading={loading}
-                disabled={loading}
-                className="w-full"
-              >
-                {!loading && <ArrowRight className="w-5 h-5" />}
-                {loading ? 'Přihlašování...' : 'Přihlásit se'}
-              </Button>
+              <div className="space-y-4">
+                <Button
+                  type="submit"
+                  variant="primary"
+                  size="lg"
+                  loading={loading}
+                  disabled={loading}
+                  className="w-full"
+                >
+                  {!loading && <ArrowRight className="w-5 h-5" />}
+                  {loading ? 'Přihlašování...' : 'Přihlásit se'}
+                </Button>
+
+                <div className="text-center">
+                  <Link
+                    href={`/auth/forgot-password${email ? `?email=${encodeURIComponent(email)}` : ''}`}
+                    className="text-sm text-blue-600 hover:text-blue-500 transition-colors"
+                  >
+                    Zapomenuté heslo?
+                  </Link>
+                </div>
+              </div>
             </form>
           </Card>
         </motion.div>

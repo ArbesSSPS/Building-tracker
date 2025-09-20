@@ -129,7 +129,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
               </nav>
 
               {/* Admin Link */}
-              {session?.user?.role === 'ADMIN' && (
+              {(session?.user?.role === 'ADMIN' || session?.user?.role === 'SUPERADMIN') && (
                 <div className="p-4 border-t border-gray-200">
                   <Button
                     variant="secondary"

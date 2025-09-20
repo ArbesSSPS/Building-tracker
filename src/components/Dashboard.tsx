@@ -158,9 +158,21 @@ export default function Dashboard() {
                 <h1 className="text-2xl font-bold text-gray-900">
                   Sledování budovy
                 </h1>
-                <p className="text-gray-600 hidden sm:block">
-                  Vítejte, {getDisplayName(session.user.name, session.user.lastName)}
-                </p>
+                <div className="text-gray-600 hidden sm:block">
+                  <div className="flex items-center space-x-2">
+                    <span>Vítejte, {getDisplayName(session.user.name, session.user.lastName)}</span>
+                    {session.user.role === 'SUPERADMIN' && (
+                      <span className="px-2 py-1 text-xs font-bold text-purple-700 bg-purple-100 rounded-full">
+                        SUPERADMIN
+                      </span>
+                    )}
+                    {session.user.role === 'ADMIN' && (
+                      <span className="px-2 py-1 text-xs font-bold text-blue-700 bg-blue-100 rounded-full">
+                        ADMIN
+                      </span>
+                    )}
+                  </div>
+                </div>
               </div>
             </div>
             
@@ -191,7 +203,7 @@ export default function Dashboard() {
                 <Settings className="w-4 h-4" />
                 <span>Nastavení</span>
               </Button>
-              {session.user.role === 'ADMIN' && (
+              {(session.user.role === 'ADMIN' || session.user.role === 'SUPERADMIN') && (
                 <Button
                   variant="secondary"
                   onClick={() => router.push('/admin')}
@@ -240,9 +252,21 @@ export default function Dashboard() {
               >
                 <div className="space-y-3">
                   <div className="px-2 py-1">
-                    <p className="text-sm text-gray-600">
-                      Vítejte, {getDisplayName(session.user.name, session.user.lastName)}
-                    </p>
+                    <div className="text-sm text-gray-600">
+                      <div className="flex items-center space-x-2">
+                        <span>Vítejte, {getDisplayName(session.user.name, session.user.lastName)}</span>
+                        {session.user.role === 'SUPERADMIN' && (
+                          <span className="px-2 py-1 text-xs font-bold text-purple-700 bg-purple-100 rounded-full">
+                            SUPERADMIN
+                          </span>
+                        )}
+                        {session.user.role === 'ADMIN' && (
+                          <span className="px-2 py-1 text-xs font-bold text-blue-700 bg-blue-100 rounded-full">
+                            ADMIN
+                          </span>
+                        )}
+                      </div>
+                    </div>
                   </div>
                   
                   <div className="flex items-center space-x-2">
@@ -282,7 +306,7 @@ export default function Dashboard() {
                     <span>Nastavení</span>
                   </Button>
 
-                  {session.user.role === 'ADMIN' && (
+                  {(session.user.role === 'ADMIN' || session.user.role === 'SUPERADMIN') && (
                     <Button
                       variant="secondary"
                       onClick={() => {

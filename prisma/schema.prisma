@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -11,64 +8,64 @@ datasource db {
 }
 
 model User {
-  id            String        @id @default(cuid())
-  email         String        @unique
-  name          String
-  lastName      String?
-  password      String
-  role          UserRole      @default(USER)
-  roomId        String?
-  room          Room?         @relation(fields: [roomId], references: [id])
-  alarmCode     String?       // Kód od alarmu
-  resetToken    String?       // Token pro obnovení hesla
-  resetTokenExpires DateTime? // Expirace reset tokenu
-  presence      Presence?
-  activityLogs  ActivityLog[]
-  cleaningRecords CleaningRecord[]
-  penalties     UncheckoutPenalty[]
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
+  id                String              @id @default(cuid())
+  email             String              @unique
+  name              String
+  lastName          String?
+  password          String
+  role              UserRole            @default(USER)
+  roomId            String?
+  alarmCode         String?
+  resetToken        String?
+  resetTokenExpires DateTime?
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  activityLogs      ActivityLog[]
+  cleaningRecords   CleaningRecord[]
+  presence          Presence?
+  penalties         UncheckoutPenalty[]
+  room              Room?               @relation(fields: [roomId], references: [id])
 
   @@map("users")
 }
 
 model Floor {
-  id          String @id @default(cuid())
-  number      Int    @unique
-  name        String
-  rooms       Room[]
-  cleaningSettings CleaningSettings?
+  id                String             @id @default(cuid())
+  number            Int                @unique
+  name              String
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  cleaningRecords   CleaningRecord[]
   cleaningRotations CleaningRotation[]
-  cleaningRecords CleaningRecord[]
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  cleaningSettings  CleaningSettings?
+  rooms             Room[]
 
   @@map("floors")
 }
 
 model Room {
-  id        String   @id @default(cuid())
-  name      String
-  project   String?  // Název projektu pro místnost
-  floorId   String
-  floor     Floor    @relation(fields: [floorId], references: [id])
-  users     User[]
+  id                String             @id @default(cuid())
+  name              String
+  project           String?
+  floorId           String
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  cleaningRecords   CleaningRecord[]
   cleaningRotations CleaningRotation[]
-  cleaningRecords CleaningRecord[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  floor             Floor              @relation(fields: [floorId], references: [id])
+  users             User[]
 
   @@map("rooms")
 }
 
 model Presence {
-  id        String      @id @default(cuid())
-  userId    String      @unique
-  user      User        @relation(fields: [userId], references: [id])
-  isPresent Boolean     @default(false)
-  lastSeen  DateTime    @default(now())
-  createdAt DateTime    @default(now())
-  updatedAt DateTime    @updatedAt
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  isPresent Boolean  @default(false)
+  lastSeen  DateTime @default(now())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id])
 
   @@map("presence")
 }
@@ -76,10 +73,10 @@ model Presence {
 model ActivityLog {
   id        String   @id @default(cuid())
   userId    String
-  user      User     @relation(fields: [userId], references: [id])
-  action    String   // "check_in" or "check_out"
+  action    String
   timestamp DateTime @default(now())
   createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
 
   @@map("activity_logs")
 }
@@ -87,9 +84,9 @@ model ActivityLog {
 model UncheckoutPenalty {
   id        String   @id @default(cuid())
   userId    String
-  user      User     @relation(fields: [userId], references: [id])
-  date      DateTime // den, za který vznikl trestný bod (lokální den)
+  date      DateTime
   createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
 
   @@unique([userId, date])
   @@map("uncheckout_penalties")
@@ -98,12 +95,12 @@ model UncheckoutPenalty {
 model CleaningSettings {
   id                String   @id @default(cuid())
   floorId           String   @unique
-  floor             Floor    @relation(fields: [floorId], references: [id])
-  frequency         String   // "weekly", "biweekly", "monthly"
-  pendingFrequency  String?  // "weekly", "biweekly", "monthly" - will be applied at end of current period
-  pendingFromPeriod String?  // Period when the change will take effect
+  frequency         String
+  pendingFrequency  String?
+  pendingFromPeriod String?
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
+  floor             Floor    @relation(fields: [floorId], references: [id])
 
   @@map("cleaning_settings")
 }
@@ -111,43 +108,43 @@ model CleaningSettings {
 model CleaningRotation {
   id        String   @id @default(cuid())
   floorId   String
-  floor     Floor    @relation(fields: [floorId], references: [id])
   roomId    String
-  room      Room     @relation(fields: [roomId], references: [id])
-  order     Int      // Pořadí v rotaci
+  order     Int
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  floor     Floor    @relation(fields: [floorId], references: [id])
+  room      Room     @relation(fields: [roomId], references: [id])
 
   @@unique([floorId, roomId])
   @@map("cleaning_rotations")
 }
 
 model CleaningRecord {
-  id        String   @id @default(cuid())
-  floorId   String
-  floor     Floor    @relation(fields: [floorId], references: [id])
-  roomId    String
-  room      Room     @relation(fields: [roomId], references: [id])
-  userId    String
-  user      User     @relation(fields: [userId], references: [id])
-  photos    String   // JSON string of photo URLs
+  id          String   @id @default(cuid())
+  floorId     String
+  roomId      String
+  userId      String
+  photos      String
   completedAt DateTime @default(now())
-  period    String   // "2024-W01", "2024-W02", "2024-M01", etc.
-  createdAt DateTime @default(now())
+  period      String
+  createdAt   DateTime @default(now())
+  floor       Floor    @relation(fields: [floorId], references: [id])
+  room        Room     @relation(fields: [roomId], references: [id])
+  user        User     @relation(fields: [userId], references: [id])
 
   @@map("cleaning_records")
 }
 
 model RegistrationCode {
-  id        String   @id @default(cuid())
-  code      String   @unique
-  role      UserRole @default(USER)
-  isUsed    Boolean  @default(false)
+  id        String    @id @default(cuid())
+  code      String    @unique
+  role      UserRole  @default(USER)
+  isUsed    Boolean   @default(false)
   usedBy    String?
   usedAt    DateTime?
   expiresAt DateTime?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
 
   @@map("registration_codes")
 }

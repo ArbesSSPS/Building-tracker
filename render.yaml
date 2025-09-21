@@ -18,9 +18,7 @@ services:
       - key: ENCRYPTION_KEY
         generateValue: true
       - key: DATABASE_URL
-        fromDatabase:
-          name: building-tracker-db
-          property: connectionString
+        value: postgresql://arbespostgres_user:JXT7NsMmPn6Wdb6aNa818rc1Qhojs048@dpg-d383h3nfte5s73bouon0-a.frankfurt-postgres.render.com/arbespostgres
       - key: API_URL
         fromService:
           type: web

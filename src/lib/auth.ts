@@ -53,7 +53,7 @@ export const authOptions: NextAuthOptions = {
           room: user.room ? {
             id: user.room.id,
             name: user.room.name,
-            project: user.room.project,
+            project: user.room.project || null,
             floorId: user.room.floorId,
             createdAt: user.room.createdAt,
             updatedAt: user.room.updatedAt,

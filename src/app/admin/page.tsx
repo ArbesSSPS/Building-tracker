@@ -143,6 +143,7 @@ export default function AdminDashboard() {
   const [newCodeCount, setNewCodeCount] = useState(1)
   const [newCodeExpires, setNewCodeExpires] = useState(30)
   const [newCodeRole, setNewCodeRole] = useState('USER')
+  const [newCodeRoom, setNewCodeRoom] = useState('')
   const [copiedCode, setCopiedCode] = useState<string | null>(null)
   
   // Role management
@@ -814,7 +815,8 @@ export default function AdminDashboard() {
         body: JSON.stringify({
           count: newCodeCount,
           expiresInDays: newCodeExpires,
-          role: newCodeRole
+          role: newCodeRole,
+          roomId: newCodeRoom || null
         })
       })
 
@@ -822,6 +824,7 @@ export default function AdminDashboard() {
         setNewCodeCount(1)
         setNewCodeExpires(30)
         setNewCodeRole('USER')
+        setNewCodeRoom('')
         fetchData()
       } else {
         const error = await response.json()
@@ -971,7 +974,7 @@ export default function AdminDashboard() {
               </motion.button>
               <Button
                 variant="secondary"
-                onClick={() => signOut()}
+                onClick={() => signOut({ callbackUrl: '/auth/signin' })}
                 className="flex items-center space-x-2"
               >
                 <LogOut className="w-4 h-4" />
@@ -1020,7 +1023,7 @@ export default function AdminDashboard() {
                   <Button
                     variant="secondary"
                     onClick={() => {
-                      signOut()
+                      signOut({ callbackUrl: '/auth/signin' })
                       setMobileMenuOpen(false)
                     }}
                     className="w-full flex items-center justify-center space-x-2"
@@ -1474,48 +1477,67 @@ export default function AdminDashboard() {
                     <Plus className="w-5 h-5 mr-2" />
                     Generovat nové kódy
                   </h3>
-                  <form onSubmit={handleGenerateCodes} className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                    <div className="flex flex-col">
-                      <label className="text-sm text-gray-600 mb-1">Počet kódů</label>
-                      <Input
-                        type="number"
-                        placeholder="Počet kódů"
-                        value={newCodeCount}
-                        onChange={(e) => setNewCodeCount(parseInt(e.target.value) || 1)}
-                        className="w-full"
-                        min="1"
-                        max="50"
-                      />
+                  <form onSubmit={handleGenerateCodes} className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="flex flex-col">
+                        <label className="text-sm text-gray-600 mb-1">Počet kódů</label>
+                        <Input
+                          type="number"
+                          placeholder="Počet kódů"
+                          value={newCodeCount}
+                          onChange={(e) => setNewCodeCount(parseInt(e.target.value) || 1)}
+                          className="w-full"
+                          min="1"
+                          max="50"
+                        />
+                      </div>
+                      <div className="flex flex-col">
+                        <label className="text-sm text-gray-600 mb-1">Expirace (dny)</label>
+                        <Input
+                          type="number"
+                          placeholder="Expirace (dny)"
+                          value={newCodeExpires}
+                          onChange={(e) => setNewCodeExpires(parseInt(e.target.value) || 30)}
+                          className="w-full"
+                          min="1"
+                        />
+                      </div>
                     </div>
-                    <div className="flex flex-col">
-                      <label className="text-sm text-gray-600 mb-1">Expirace (dny)</label>
-                      <Input
-                        type="number"
-                        placeholder="Expirace (dny)"
-                        value={newCodeExpires}
-                        onChange={(e) => setNewCodeExpires(parseInt(e.target.value) || 30)}
-                        className="w-full"
-                        min="1"
-                      />
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="flex flex-col">
+                        <label className="text-sm text-gray-600 mb-1">Role</label>
+                        <select
+                          value={newCodeRole}
+                          onChange={(e) => setNewCodeRole(e.target.value)}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        >
+                          <option value="USER">USER</option>
+                          <option value="ADMIN">ADMIN</option>
+                          {session?.user?.role === 'SUPERADMIN' && (
+                            <option value="SUPERADMIN">SUPERADMIN</option>
+                          )}
+                        </select>
+                      </div>
+                      <div className="flex flex-col">
+                        <label className="text-sm text-gray-600 mb-1">Místnost (volitelné)</label>
+                        <select
+                          value={newCodeRoom}
+                          onChange={(e) => setNewCodeRoom(e.target.value)}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        >
+                          <option value="">Žádná místnost</option>
+                          {rooms.map((room) => (
+                            <option key={room.id} value={room.id}>
+                              {room.name} (Patro {room.floor.number})
+                            </option>
+                          ))}
+                        </select>
+                      </div>
                     </div>
-                    <div className="flex flex-col">
-                      <label className="text-sm text-gray-600 mb-1">Role</label>
-                      <select
-                        value={newCodeRole}
-                        onChange={(e) => setNewCodeRole(e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      >
-                        <option value="USER">USER</option>
-                        <option value="ADMIN">ADMIN</option>
-                        {session?.user?.role === 'SUPERADMIN' && (
-                          <option value="SUPERADMIN">SUPERADMIN</option>
-                        )}
-                      </select>
-                    </div>
-                    <div className="flex items-end">
-                      <Button type="submit" variant="primary" className="w-full">
-                        <Plus className="w-4 h-4" />
-                        Generovat
+                    <div className="flex justify-end">
+                      <Button type="submit" variant="primary" className="px-8">
+                        <Plus className="w-4 h-4 mr-2" />
+                        Generovat {newCodeCount} kód{newCodeCount > 1 ? 'ů' : ''} ({newCodeExpires} dní)
                       </Button>
                     </div>
                   </form>
@@ -1555,6 +1577,11 @@ export default function AdminDashboard() {
                             }`}>
                               {code.role}
                             </span>
+                            {code.room && (
+                              <span className="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                {code.room.name} (P{code.room.floor.number})
+                              </span>
+                            )}
                             {code.expiresAt && (
                               <span className="text-xs text-gray-500">
                                 Expiruje: {new Date(code.expiresAt).toLocaleDateString('cs-CZ')}

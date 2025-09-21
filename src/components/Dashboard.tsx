@@ -216,7 +216,7 @@ export default function Dashboard() {
               )}
               <Button
                 variant="secondary"
-                onClick={() => signOut()}
+                onClick={() => signOut({ callbackUrl: '/auth/signin' })}
                 className="flex items-center space-x-2"
               >
                 <LogOut className="w-4 h-4" />
@@ -324,7 +324,7 @@ export default function Dashboard() {
                   <Button
                     variant="secondary"
                     onClick={() => {
-                      signOut()
+                      signOut({ callbackUrl: '/auth/signin' })
                       setMobileMenuOpen(false)
                     }}
                     className="w-full flex items-center justify-center space-x-2"

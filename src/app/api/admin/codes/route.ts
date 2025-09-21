@@ -12,6 +12,13 @@ export async function GET() {
     }
 
     const codes = await prisma.registrationCode.findMany({
+      include: {
+        room: {
+          include: {
+            floor: true
+          }
+        }
+      },
       orderBy: { createdAt: 'desc' }
     })
 
@@ -34,7 +41,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Neautorizováno' }, { status: 401 })
     }
 
-    const { count = 1, expiresInDays, role = 'USER' } = await request.json()
+    const { count = 1, expiresInDays, role = 'USER', roomId } = await request.json()
 
     if (count < 1 || count > 50) {
       return NextResponse.json(
@@ -69,7 +76,8 @@ export async function POST(request: NextRequest) {
         data: {
           code,
           role,
-          expiresAt
+          expiresAt,
+          roomId: roomId || null
         }
       })
       codes.push(registrationCode)

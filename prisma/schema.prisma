@@ -52,6 +52,7 @@ model Room {
   updatedAt         DateTime           @updatedAt
   cleaningRecords   CleaningRecord[]
   cleaningRotations CleaningRotation[]
+  registrationCodes RegistrationCode[]
   floor             Floor              @relation(fields: [floorId], references: [id])
   users             User[]
 
@@ -139,6 +140,8 @@ model RegistrationCode {
   id        String    @id @default(cuid())
   code      String    @unique
   role      UserRole  @default(USER)
+  roomId    String?
+  room      Room?     @relation(fields: [roomId], references: [id])
   isUsed    Boolean   @default(false)
   usedBy    String?
   usedAt    DateTime?

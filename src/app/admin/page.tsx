@@ -974,7 +974,7 @@ export default function AdminDashboard() {
               </motion.button>
               <Button
                 variant="secondary"
-                onClick={() => signOut({ callbackUrl: '/auth/signin' })}
+                onClick={() => signOut({ callbackUrl: `${window.location.origin}/auth/signin` })}
                 className="flex items-center space-x-2"
               >
                 <LogOut className="w-4 h-4" />
@@ -1023,7 +1023,7 @@ export default function AdminDashboard() {
                   <Button
                     variant="secondary"
                     onClick={() => {
-                      signOut({ callbackUrl: '/auth/signin' })
+                      signOut({ callbackUrl: `${window.location.origin}/auth/signin` })
                       setMobileMenuOpen(false)
                     }}
                     className="w-full flex items-center justify-center space-x-2"

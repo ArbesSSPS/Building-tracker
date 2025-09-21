@@ -160,7 +160,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
               <div className="p-4 border-t border-gray-200">
                 <Button
                   variant="secondary"
-                  onClick={() => signOut({ callbackUrl: '/auth/signin' })}
+                  onClick={() => signOut({ callbackUrl: `${window.location.origin}/auth/signin` })}
                   className="w-full flex items-center space-x-3 text-red-600 hover:text-red-700"
                 >
                   <LogOut className="w-5 h-5" />

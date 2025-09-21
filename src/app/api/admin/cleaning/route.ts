@@ -7,7 +7,7 @@ export async function GET() {
   try {
     const session = await getServerSession(authOptions)
     
-    if (!session?.user?.id || session.user.role !== 'ADMIN') {
+    if (!session?.user?.id || !['ADMIN', 'SUPERADMIN'].includes(session.user.role)) {
       return NextResponse.json({ error: 'Neautorizováno' }, { status: 401 })
     }
 
@@ -52,8 +52,8 @@ export async function GET() {
 
       // If there's a pending change, check if it's time to apply it
       if (hasPendingChange) {
-        const pendingFromPeriod = floor.cleaningSettings.pendingFromPeriod
-        const currentPeriodWithNewFrequency = getCurrentPeriod(floor.cleaningSettings.pendingFrequency)
+        const pendingFromPeriod = floor.cleaningSettings?.pendingFromPeriod
+        const currentPeriodWithNewFrequency = getCurrentPeriod(floor.cleaningSettings?.pendingFrequency || 'weekly')
         
         // Check if the pending period has started
         // Only apply when we're in the pending period or later
@@ -63,7 +63,7 @@ export async function GET() {
           prisma.cleaningSettings.update({
             where: { floorId: floor.id },
             data: {
-              frequency: floor.cleaningSettings.pendingFrequency,
+              frequency: floor.cleaningSettings?.pendingFrequency || 'weekly',
               pendingFrequency: null,
               pendingFromPeriod: null
             }
@@ -129,7 +129,7 @@ export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
     
-    if (!session?.user?.id || session.user.role !== 'ADMIN') {
+    if (!session?.user?.id || !['ADMIN', 'SUPERADMIN'].includes(session.user.role)) {
       return NextResponse.json({ error: 'Neautorizováno' }, { status: 401 })
     }
 

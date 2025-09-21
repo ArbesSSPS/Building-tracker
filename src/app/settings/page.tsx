@@ -279,7 +279,7 @@ export default function SettingsPage() {
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Spolubydlící
+                      Spolupracující
                     </label>
                     <div className="space-y-1">
                       {profile.room.users.map((user) => (

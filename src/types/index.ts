@@ -21,6 +21,7 @@ export interface Floor {
 export interface Room {
   id: string
   name: string
+  project?: string | null
   floorId: string
   floor?: Floor
   users: User[]

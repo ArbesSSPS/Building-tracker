@@ -18,8 +18,25 @@ declare module 'next-auth' {
     email: string
     name: string
     role: UserRole
-    room?: Room
-    presence?: Presence
+    room?: {
+      id: string
+      name: string
+      project: string | null
+      floorId: string
+      createdAt: Date
+      updatedAt: Date
+      floor: {
+        id: string
+        number: number
+        name: string
+        createdAt: Date
+        updatedAt: Date
+      }
+      users: any[]
+      cleaningRotations: any[]
+      cleaningRecords: any[]
+    }
+    presence?: Presence | null
     rememberMe?: boolean
   }
 }
@@ -27,8 +44,25 @@ declare module 'next-auth' {
 declare module 'next-auth/jwt' {
   interface JWT {
     role: UserRole
-    room?: Room
-    presence?: Presence
+    room?: {
+      id: string
+      name: string
+      project: string | null
+      floorId: string
+      createdAt: Date
+      updatedAt: Date
+      floor: {
+        id: string
+        number: number
+        name: string
+        createdAt: Date
+        updatedAt: Date
+      }
+      users: any[]
+      cleaningRotations: any[]
+      cleaningRecords: any[]
+    }
+    presence?: Presence | null
     rememberMe?: boolean
   }
 }

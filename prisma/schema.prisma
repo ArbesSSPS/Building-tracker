@@ -6,7 +6,7 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
@@ -49,6 +49,7 @@ model Floor {
 model Room {
   id        String   @id @default(cuid())
   name      String
+  project   String?  // Název projektu pro místnost
   floorId   String
   floor     Floor    @relation(fields: [floorId], references: [id])
   users     User[]

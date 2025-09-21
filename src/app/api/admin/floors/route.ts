@@ -7,7 +7,7 @@ export async function GET() {
   try {
     const session = await getServerSession(authOptions)
     
-    if (!session?.user?.id || session.user.role !== 'ADMIN') {
+    if (!session?.user?.id || !['ADMIN', 'SUPERADMIN'].includes(session.user.role)) {
       return NextResponse.json({ error: 'Neautorizováno' }, { status: 401 })
     }
 
@@ -41,7 +41,7 @@ export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
     
-    if (!session?.user?.id || session.user.role !== 'ADMIN') {
+    if (!session?.user?.id || !['ADMIN', 'SUPERADMIN'].includes(session.user.role)) {
       return NextResponse.json({ error: 'Neautorizováno' }, { status: 401 })
     }
 
@@ -75,7 +75,7 @@ export async function PUT(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
     
-    if (!session?.user?.id || session.user.role !== 'ADMIN') {
+    if (!session?.user?.id || !['ADMIN', 'SUPERADMIN'].includes(session.user.role)) {
       return NextResponse.json({ error: 'Neautorizováno' }, { status: 401 })
     }
 
@@ -122,7 +122,7 @@ export async function DELETE(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
     
-    if (!session?.user?.id || session.user.role !== 'ADMIN') {
+    if (!session?.user?.id || !['ADMIN', 'SUPERADMIN'].includes(session.user.role)) {
       return NextResponse.json({ error: 'Neautorizováno' }, { status: 401 })
     }
 
@@ -142,7 +142,7 @@ export async function DELETE(request: NextRequest) {
       include: { rooms: true }
     })
 
-    if (floorWithRooms?.rooms.length > 0) {
+    if (floorWithRooms?.rooms?.length && floorWithRooms.rooms.length > 0) {
       return NextResponse.json(
         { error: 'Nelze smazat patro s místnostmi' },
         { status: 400 }

@@ -1,13 +1,13 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { ArrowLeft, Mail, CheckCircle } from 'lucide-react'
 import Button from '@/components/ui/Button'
 import Input from '@/components/ui/Input'
 
-export default function ForgotPassword() {
+function ForgotPasswordForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [email, setEmail] = useState(searchParams.get('email') || '')
@@ -135,5 +135,20 @@ export default function ForgotPassword() {
         </form>
       </motion.div>
     </div>
+  )
+}
+
+export default function ForgotPassword() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Načítání...</p>
+        </div>
+      </div>
+    }>
+      <ForgotPasswordForm />
+    </Suspense>
   )
 }

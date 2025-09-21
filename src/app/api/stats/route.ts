@@ -32,7 +32,7 @@ export async function GET() {
     }
 
     // Get floor statistics for admin
-    let floorStats = []
+    let floorStats: any[] = []
     if (session.user.role === 'ADMIN') {
       floorStats = await prisma.floor.findMany({
         include: {

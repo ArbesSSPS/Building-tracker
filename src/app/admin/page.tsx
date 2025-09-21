@@ -49,13 +49,88 @@ export default function AdminDashboard() {
     return lastName ? `${name} ${lastName}` : name
   }
 
+  // Helper functions for cleaning periods
+  function getCurrentPeriod(frequency: string): string {
+    const now = new Date()
+    const year = now.getFullYear()
+    const month = now.getMonth() + 1
+    
+    if (frequency === 'weekly') {
+      const week = getWeekNumber(now)
+      return `${year}-W${week.toString().padStart(2, '0')}`
+    } else if (frequency === 'biweekly') {
+      const week = getWeekNumber(now)
+      const biweek = Math.ceil(week / 2)
+      return `${year}-BW${biweek.toString().padStart(2, '0')}`
+    } else if (frequency === 'monthly') {
+      return `${year}-M${month.toString().padStart(2, '0')}`
+    }
+    
+    return `${year}-W${getWeekNumber(now).toString().padStart(2, '0')}`
+  }
+
+  function getWeekNumber(date: Date): number {
+    const year = date.getFullYear()
+    
+    // Týden 1: 1.1. do 7.1.
+    const jan1 = new Date(year, 0, 1)
+    const jan7 = new Date(year, 0, 7)
+    
+    // Najdi první neděli roku
+    const firstSunday = new Date(jan1)
+    firstSunday.setDate(jan1.getDate() + (7 - jan1.getDay()) % 7)
+    
+    // Pokud je 1.1. neděle, pak je to týden 1
+    if (jan1.getDay() === 0) {
+      firstSunday.setDate(1)
+    }
+    
+    // Pokud je 1.1. po neděli, pak první neděle je v předchozím roce
+    if (jan1.getDay() > 0) {
+      firstSunday.setDate(firstSunday.getDate() - 7)
+    }
+    
+    // Spočítej týdny od první neděle
+    const diffTime = date.getTime() - firstSunday.getTime()
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24))
+    const weekNumber = Math.floor(diffDays / 7) + 1
+    
+    // Pokud je datum před první nedělí, je to poslední týden předchozího roku
+    if (weekNumber <= 0) {
+      const lastYear = year - 1
+      const lastYearJan1 = new Date(lastYear, 0, 1)
+      const lastYearDec31 = new Date(lastYear, 11, 31)
+      
+      // Najdi poslední neděli předchozího roku
+      const lastSunday = new Date(lastYearDec31)
+      lastSunday.setDate(lastYearDec31.getDate() - lastYearDec31.getDay())
+      
+      const lastYearDiffTime = date.getTime() - lastSunday.getTime()
+      const lastYearDiffDays = Math.floor(lastYearDiffTime / (1000 * 60 * 60 * 24))
+      return Math.floor(lastYearDiffDays / 7) + 1
+    }
+    
+    return weekNumber
+  }
+
+  function getCurrentRoomIndex(rotations: any[], currentPeriod: string): number {
+    if (!rotations || rotations.length === 0) return 0
+    
+    // Parse period to get week/biweek/month number
+    const periodMatch = currentPeriod.match(/-W(\d{2})|-BW(\d{2})|-M(\d{2})/)
+    if (!periodMatch) return 0
+    
+    const periodNumber = parseInt(periodMatch[1] || periodMatch[2] || periodMatch[3])
+    return (periodNumber - 1) % rotations.length
+  }
+
   // Floor management
   const [newFloor, setNewFloor] = useState({ number: '', name: '' })
-  const [newRoom, setNewRoom] = useState({ name: '', floorId: '' })
+  const [newRoom, setNewRoom] = useState({ name: '', project: '', floorId: '' })
   
   // Room editing
   const [editingRoom, setEditingRoom] = useState<Room | null>(null)
-  const [editRoom, setEditRoom] = useState({ name: '', floorId: '' })
+  const [editRoom, setEditRoom] = useState({ name: '', project: '', floorId: '' })
   const [showEditForm, setShowEditForm] = useState(false)
   
   // Floor editing
@@ -85,11 +160,32 @@ export default function AdminDashboard() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   
 
+  // Redirect to signin if not authenticated
   useEffect(() => {
-    if (session?.user?.role === 'ADMIN') {
+    if (!session) {
+      router.push('/auth/signin')
+    }
+  }, [session, router])
+
+  // Redirect if not admin or superadmin
+  useEffect(() => {
+    if (session && !['ADMIN', 'SUPERADMIN'].includes(session.user.role)) {
+      router.push('/')
+    }
+  }, [session, router])
+
+  useEffect(() => {
+    if (['ADMIN', 'SUPERADMIN'].includes(session?.user?.role || '')) {
       fetchData()
     }
   }, [session])
+
+  // Redirect away from codes tab if not superadmin
+  useEffect(() => {
+    if (session?.user?.role === 'ADMIN' && activeTab === 'codes') {
+      setActiveTab('floors')
+    }
+  }, [session?.user?.role, activeTab])
 
   // Auto-refresh activity and users every 60s when on Activity tab
   useEffect(() => {
@@ -370,25 +466,6 @@ export default function AdminDashboard() {
     return currentPeriod
   }
 
-  // Určí index aktuálně zodpovědné místnosti v rotaci na základě období
-  const getCurrentRoomIndex = (rotations: any[], period: string) => {
-    if (!Array.isArray(rotations) || rotations.length === 0) return 0
-
-    let periodNumber = 1
-    if (period.includes('-W')) {
-      const part = period.split('-W')[1]
-      periodNumber = parseInt(part || '1', 10) || 1
-    } else if (period.includes('-BW')) {
-      const part = period.split('-BW')[1]
-      periodNumber = parseInt(part || '1', 10) || 1
-    } else if (period.includes('-M')) {
-      const part = period.split('-M')[1]
-      periodNumber = parseInt(part || '1', 10) || 1
-    }
-
-    const idx = (periodNumber - 1) % rotations.length
-    return idx < 0 ? 0 : idx
-  }
 
   // Helper function to check if floor completed cleaning in last 3 days of current period
   const checkIfFloorCompletedInLast3Days = (floorId: string, cleaningRecords: any[], currentPeriod: string, frequency: string) => {
@@ -534,7 +611,7 @@ export default function AdminDashboard() {
       })
 
       if (response.ok) {
-        setNewRoom({ name: '', floorId: '' })
+        setNewRoom({ name: '', project: '', floorId: '' })
         fetchData()
       }
     } catch (error) {
@@ -613,7 +690,7 @@ export default function AdminDashboard() {
 
   const handleEditRoom = (room: Room) => {
     setEditingRoom(room)
-    setEditRoom({ name: room.name, floorId: room.floorId })
+    setEditRoom({ name: room.name, project: room.project || '', floorId: room.floorId })
     setShowEditForm(true)
   }
 
@@ -628,6 +705,7 @@ export default function AdminDashboard() {
         body: JSON.stringify({
           id: editingRoom.id,
           name: editRoom.name,
+          project: editRoom.project,
           floorId: editRoom.floorId
         })
       })
@@ -635,7 +713,7 @@ export default function AdminDashboard() {
       if (response.ok) {
         setShowEditForm(false)
         setEditingRoom(null)
-        setEditRoom({ name: '', floorId: '' })
+        setEditRoom({ name: '', project: '', floorId: '' })
         fetchData()
       }
     } catch (error) {
@@ -665,7 +743,7 @@ export default function AdminDashboard() {
   const cancelEdit = () => {
     setShowEditForm(false)
     setEditingRoom(null)
-    setEditRoom({ name: '', floorId: '' })
+    setEditRoom({ name: '', project: '', floorId: '' })
   }
 
   const handleEditFloor = (floor: Floor) => {
@@ -816,7 +894,6 @@ export default function AdminDashboard() {
   }
 
   if (!session) {
-    router.push('/auth/signin')
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <motion.div
@@ -831,8 +908,7 @@ export default function AdminDashboard() {
     )
   }
 
-  if (session.user.role !== 'ADMIN') {
-    router.push('/')
+  if (session && !['ADMIN', 'SUPERADMIN'].includes(session.user.role)) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <motion.div
@@ -940,6 +1016,7 @@ export default function AdminDashboard() {
                     </motion.button>
                   </div>
                   
+                  
                   <Button
                     variant="secondary"
                     onClick={() => {
@@ -968,12 +1045,16 @@ export default function AdminDashboard() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.1 }}
           >
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
+            <div className={`grid gap-2 ${
+              session?.user?.role === 'SUPERADMIN' 
+                ? 'grid-cols-2 sm:grid-cols-3 lg:grid-cols-6' 
+                : 'grid-cols-2 sm:grid-cols-3 lg:grid-cols-5'
+            }`}>
               {[
                 { id: 'floors', name: 'Patra', icon: Building2, shortName: 'Patra' },
                 { id: 'rooms', name: 'Místnosti', icon: MapPin, shortName: 'Místnosti' },
                 { id: 'users', name: 'Uživatelé', icon: Users, shortName: 'Uživatelé' },
-                { id: 'codes', name: 'Kódy', icon: Key, shortName: 'Kódy' },
+                ...(session?.user?.role === 'SUPERADMIN' ? [{ id: 'codes', name: 'Kódy', icon: Key, shortName: 'Kódy' }] : []),
                 { id: 'activity', name: 'Aktivita', icon: Activity, shortName: 'Aktivita' },
                 { id: 'cleaning', name: 'Uklid', icon: Sparkles, shortName: 'Uklid' },
               ].map((tab) => {
@@ -1146,12 +1227,19 @@ export default function AdminDashboard() {
                     <Plus className="w-5 h-5 mr-2" />
                     Přidat novou místnost
                   </h3>
-                  <form onSubmit={handleCreateRoom} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <form onSubmit={handleCreateRoom} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                     <Input
                       type="text"
                       placeholder="Název místnosti"
                       value={newRoom.name}
                       onChange={(e) => setNewRoom({ ...newRoom, name: e.target.value })}
+                      className="w-full"
+                    />
+                    <Input
+                      type="text"
+                      placeholder="Název projektu (volitelné)"
+                      value={newRoom.project}
+                      onChange={(e) => setNewRoom({ ...newRoom, project: e.target.value })}
                       className="w-full"
                     />
                     <select
@@ -1166,7 +1254,7 @@ export default function AdminDashboard() {
                         </option>
                       ))}
                     </select>
-                    <Button type="submit" variant="primary" className="w-full sm:col-span-2 lg:col-span-1">
+                    <Button type="submit" variant="primary" className="w-full">
                       <Plus className="w-4 h-4" />
                       <span className="hidden sm:inline">Přidat</span>
                       <span className="sm:hidden">+</span>
@@ -1188,12 +1276,19 @@ export default function AdminDashboard() {
                           <Edit3 className="w-5 h-5 mr-2" />
                           Upravit místnost
                         </h3>
-                        <form onSubmit={handleUpdateRoom} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <form onSubmit={handleUpdateRoom} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
                           <Input
                             type="text"
                             placeholder="Název místnosti"
                             value={editRoom.name}
                             onChange={(e) => setEditRoom({ ...editRoom, name: e.target.value })}
+                            className="w-full"
+                          />
+                          <Input
+                            type="text"
+                            placeholder="Název projektu (volitelné)"
+                            value={editRoom.project}
+                            onChange={(e) => setEditRoom({ ...editRoom, project: e.target.value })}
                             className="w-full"
                           />
                           <select
@@ -1243,6 +1338,11 @@ export default function AdminDashboard() {
                           </h4>
                           <p className="text-sm text-gray-500">
                             Patro {room.floor?.number} • {room.users.length} uživatelů
+                            {room.project && (
+                              <span className="ml-2 px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">
+                                {room.project}
+                              </span>
+                            )}
                           </p>
                         </div>
                         <div className="flex items-center space-x-2">
@@ -1334,7 +1434,6 @@ export default function AdminDashboard() {
                                 size="sm"
                                 onClick={() => handleEditUserRole(user)}
                                 className="flex-1 sm:flex-none"
-                                title="Změnit roli uživatele"
                               >
                                 <Settings className="w-4 h-4" />
                                 <span className="sm:hidden ml-2">Role</span>
@@ -1345,7 +1444,6 @@ export default function AdminDashboard() {
                               size="sm"
                               onClick={() => handleDeleteUser(user.id, getDisplayName(user.name, user.lastName))}
                               className="flex-1 sm:flex-none"
-                              title="Smazat uživatele"
                             >
                               <Trash2 className="w-4 h-4" />
                               <span className="sm:hidden ml-2">Smazat</span>
@@ -1469,7 +1567,6 @@ export default function AdminDashboard() {
                             variant="secondary"
                             size="sm"
                             onClick={() => copyToClipboard(code.code)}
-                            title={code.isUsed ? "Kopírovat použitý kód" : "Kopírovat kód"}
                           >
                             {copiedCode === code.code ? (
                               <Check className="w-4 h-4" />
@@ -1481,7 +1578,6 @@ export default function AdminDashboard() {
                             variant="danger"
                             size="sm"
                             onClick={() => handleDeleteCode(code.id, code)}
-                            title={code.isUsed ? "Smazat použitý kód" : "Smazat kód"}
                           >
                             <Trash2 className="w-4 h-4" />
                           </Button>

@@ -1,0 +1,46 @@
+services:
+  - type: web
+    name: building-tracker
+    env: node
+    plan: starter
+    buildCommand: npm install && npm run db:deploy && npm run build
+    startCommand: npm run start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NEXTAUTH_URL
+        fromService:
+          type: web
+          name: building-tracker
+          property: host
+      - key: NEXTAUTH_SECRET
+        generateValue: true
+      - key: ENCRYPTION_KEY
+        generateValue: true
+      - key: DATABASE_URL
+        fromDatabase:
+          name: building-tracker-db
+          property: connectionString
+      - key: API_URL
+        fromService:
+          type: web
+          name: building-tracker
+          property: host
+      - key: SMTP_HOST
+        value: smtp.gmail.com
+      - key: SMTP_PORT
+        value: "587"
+      - key: SMTP_USER
+        value: ""
+      - key: SMTP_PASS
+        value: ""
+      - key: FROM_EMAIL
+        value: ""
+      - key: FROM_NAME
+        value: "Building Tracker"
+
+  - type: pserv
+    name: building-tracker-db
+    plan: starter
+    databaseName: building_tracker
+    user: building_tracker_user

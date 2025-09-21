@@ -7,7 +7,7 @@ export async function GET() {
   try {
     const session = await getServerSession(authOptions)
     
-    if (!session?.user?.id || session.user.role !== 'ADMIN') {
+    if (!session?.user?.id || !['ADMIN', 'SUPERADMIN'].includes(session.user.role)) {
       return NextResponse.json({ error: 'Neautorizováno' }, { status: 401 })
     }
 
@@ -42,7 +42,7 @@ export async function GET() {
     })
 
     // Group activity logs by user and date, then create work sessions
-    const workSessions = []
+    const workSessions: any[] = []
     
     // Group by user and date
     const groupedByUserAndDate = activityLogs.reduce((acc, log) => {

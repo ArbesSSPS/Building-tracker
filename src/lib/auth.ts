@@ -4,6 +4,7 @@ import bcrypt from 'bcryptjs'
 import { prisma } from './prisma'
 
 export const authOptions: NextAuthOptions = {
+  secret: process.env.NEXTAUTH_SECRET,
   providers: [
     CredentialsProvider({
       name: 'credentials',
@@ -48,9 +49,19 @@ export const authOptions: NextAuthOptions = {
           id: user.id,
           email: user.email,
           name: user.name,
-          lastName: user.lastName,
           role: user.role,
-          room: user.room,
+          room: user.room ? {
+            id: user.room.id,
+            name: user.room.name,
+            project: user.room.project,
+            floorId: user.room.floorId,
+            createdAt: user.room.createdAt,
+            updatedAt: user.room.updatedAt,
+            floor: user.room.floor,
+            users: [],
+            cleaningRotations: [],
+            cleaningRecords: []
+          } : undefined,
           presence: user.presence,
           rememberMe: credentials.rememberMe === 'true'
         }
@@ -84,7 +95,7 @@ export const authOptions: NextAuthOptions = {
     async session({ session, token }) {
       if (token) {
         session.user.id = token.sub!
-        session.user.role = token.role as string
+        session.user.role = token.role
         session.user.room = token.room as any
         session.user.presence = token.presence as any
       }
@@ -92,7 +103,6 @@ export const authOptions: NextAuthOptions = {
     }
   },
   pages: {
-    signIn: '/auth/signin',
-    signUp: '/auth/signup'
+    signIn: '/auth/signin'
   }
 }

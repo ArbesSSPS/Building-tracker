@@ -4,12 +4,12 @@ import path from 'path';
 
 // SMTP konfigurace
 const smtpConfig = {
-  host: process.env.SMTP_HOST || 'smtp.websupport.cz',
-  port: parseInt(process.env.SMTP_PORT || '465'),
-  secure: true, // true pro port 465, false pro ostatní porty
+  host: process.env.SMTP_HOST || 'smtp.gmail.com',
+  port: parseInt(process.env.SMTP_PORT || '587'),
+  secure: process.env.SMTP_PORT === '465', // true pro port 465, false pro ostatní porty
   auth: {
-    user: process.env.SMTP_USER || 'arbes@virtuex.cz',
-    pass: process.env.SMTP_PASS || '|S1NkY[+L]AoeR.ygYxP',
+    user: process.env.SMTP_USER,
+    pass: process.env.SMTP_PASS,
   },
 };
 
@@ -73,9 +73,9 @@ export async function sendCleaningReminderEmail(data: CleaningReminderData): Pro
 
     // Konfigurace emailu
     const mailOptions = {
-      from: `"Arbesovo Náměstí" <${smtpConfig.auth.user}>`,
+      from: `"${process.env.FROM_NAME || 'Building Tracker'}" <${process.env.FROM_EMAIL || smtpConfig.auth.user}>`,
       to: data.recipientEmail,
-      cc: 'arbes@virtuex.cz', // CC na admin email
+      cc: process.env.FROM_EMAIL, // CC na admin email
       subject: `Připomínka úklidu - Arbesovo nám. 70/4 (${data.weekDate})`,
       html: htmlContent,
       text: `
@@ -132,21 +132,21 @@ export async function sendPasswordResetEmail(data: PasswordResetData): Promise<b
     
     // Konfigurace emailu
     const mailOptions = {
-      from: `"Arbesovo Náměstí" <${smtpConfig.auth.user}>`,
+      from: `"${process.env.FROM_NAME || 'Building Tracker'}" <${process.env.FROM_EMAIL || smtpConfig.auth.user}>`,
       to: data.recipientEmail,
       subject: 'Obnovení hesla - Building Tracker',
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
           <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
             <h1 style="margin: 0; font-size: 24px;">Obnovení hesla</h1>
-            <p style="margin: 10px 0 0 0; opacity: 0.9;">Building Tracker</p>
+            <p style="margin: 10px 0 0 0; opacity: 0.9;">Arbesovo náměstí</p>
           </div>
           
           <div style="background: white; padding: 30px; border: 1px solid #e1e5e9; border-top: none; border-radius: 0 0 10px 10px;">
             <h2 style="color: #333; margin-top: 0;">Dobrý den, ${data.recipientName}!</h2>
             
             <p style="color: #666; line-height: 1.6;">
-              Obdrželi jsme žádost o obnovení hesla pro váš účet v Building Tracker systému.
+              Obdrželi jsme žádost o obnovení hesla pro váš účet v systému pro správu budovy.
             </p>
             
             <p style="color: #666; line-height: 1.6;">
@@ -179,7 +179,7 @@ export async function sendPasswordResetEmail(data: PasswordResetData): Promise<b
             <hr style="border: none; border-top: 1px solid #e1e5e9; margin: 30px 0;">
             
             <p style="color: #999; font-size: 12px; text-align: center; margin: 0;">
-              Building Tracker - Systém pro správu budovy<br>
+              Systém pro správu budovy<br>
               Arbesovo náměstí 70/4, Praha
             </p>
           </div>
@@ -188,7 +188,7 @@ export async function sendPasswordResetEmail(data: PasswordResetData): Promise<b
       text: `
 Dobrý den, ${data.recipientName}!
 
-Obdrželi jsme žádost o obnovení hesla pro váš účet v Building Tracker systému.
+Obdrželi jsme žádost o obnovení hesla pro váš účet v systému pro správu budovy.
 
 Pro obnovení hesla klikněte na následující odkaz:
 ${data.resetLink}
@@ -199,7 +199,7 @@ Vaše heslo zůstane beze změny.
 Tento odkaz je platný po dobu 1 hodiny z bezpečnostních důvodů.
 
 ---
-Building Tracker - Systém pro správu budovy
+Systém pro správu budovy
 Arbesovo náměstí 70/4, Praha
       `.trim(),
     };
@@ -223,8 +223,8 @@ export async function sendTestEmail(to: string): Promise<boolean> {
       weekDate: '1. - 7. ledna 2025',
       responsiblePeople: 'Jan Novák, Marie Svobodová',
       room: 'Kuchyň',
-      appLink: 'http://localhost:3000/cleaning',
-      adminEmail: 'arbes@virtuex.cz',
+      appLink: process.env.API_URL + '/cleaning' || 'http://localhost:3000/cleaning',
+      adminEmail: process.env.FROM_EMAIL || 'admin@example.com',
     };
 
     return await sendCleaningReminderEmail(testData);

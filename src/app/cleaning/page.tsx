@@ -594,7 +594,7 @@ export default function CleaningPage() {
                     setCleaningCompleted(false)
                     setIsAlreadyCompleted(false)
                   }}
-                  variant="outline"
+                  variant="secondary"
                   className="mt-4"
                 >
                   Zobrazit detaily

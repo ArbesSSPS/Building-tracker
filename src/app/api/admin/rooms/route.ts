@@ -7,7 +7,7 @@ export async function GET() {
   try {
     const session = await getServerSession(authOptions)
     
-    if (!session?.user?.id || session.user.role !== 'ADMIN') {
+    if (!session?.user?.id || !['ADMIN', 'SUPERADMIN'].includes(session.user.role)) {
       return NextResponse.json({ error: 'Neautorizováno' }, { status: 401 })
     }
 
@@ -40,11 +40,11 @@ export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
     
-    if (!session?.user?.id || session.user.role !== 'ADMIN') {
+    if (!session?.user?.id || !['ADMIN', 'SUPERADMIN'].includes(session.user.role)) {
       return NextResponse.json({ error: 'Neautorizováno' }, { status: 401 })
     }
 
-    const { name, floorId } = await request.json()
+    const { name, project, floorId } = await request.json()
 
     if (!name || !floorId) {
       return NextResponse.json(
@@ -56,6 +56,7 @@ export async function POST(request: NextRequest) {
     const room = await prisma.room.create({
       data: {
         name,
+        project: project || null,
         floorId
       },
       include: {
@@ -93,11 +94,11 @@ export async function PUT(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
     
-    if (!session?.user?.id || session.user.role !== 'ADMIN') {
+    if (!session?.user?.id || !['ADMIN', 'SUPERADMIN'].includes(session.user.role)) {
       return NextResponse.json({ error: 'Neautorizováno' }, { status: 401 })
     }
 
-    const { id, name, floorId } = await request.json()
+    const { id, name, project, floorId } = await request.json()
 
     if (!id || !name || !floorId) {
       return NextResponse.json(
@@ -110,6 +111,7 @@ export async function PUT(request: NextRequest) {
       where: { id },
       data: {
         name,
+        project: project || null,
         floorId
       },
       include: {
@@ -136,7 +138,7 @@ export async function DELETE(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
     
-    if (!session?.user?.id || session.user.role !== 'ADMIN') {
+    if (!session?.user?.id || !['ADMIN', 'SUPERADMIN'].includes(session.user.role)) {
       return NextResponse.json({ error: 'Neautorizováno' }, { status: 401 })
     }
 
@@ -156,7 +158,7 @@ export async function DELETE(request: NextRequest) {
       include: { users: true }
     })
 
-    if (roomWithUsers?.users.length > 0) {
+    if (roomWithUsers?.users?.length && roomWithUsers.users.length > 0) {
       return NextResponse.json(
         { error: 'Nelze smazat místnost s přiřazenými uživateli' },
         { status: 400 }

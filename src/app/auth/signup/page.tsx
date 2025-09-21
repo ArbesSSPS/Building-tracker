@@ -69,6 +69,11 @@ export default function SignUp() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
+        style={{ 
+          width: '100%', 
+          maxWidth: '448px',
+          contain: 'layout'
+        }}
       >
         {/* Header */}
         <div className="text-center">
@@ -111,46 +116,54 @@ export default function SignUp() {
           transition={{ duration: 0.5, delay: 0.5 }}
         >
           <Card className="p-8">
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <form onSubmit={handleSubmit} className="space-y-6" style={{ contain: 'layout' }}>
+              <div className="flex flex-col sm:flex-row gap-2">
+                <div className="w-full sm:w-[calc(50%-4px)]">
+                  <Input
+                    label="Jméno"
+                    type="text"
+                    placeholder="Vaše jméno"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    icon={<User className="w-5 h-5" />}
+                    required
+                  />
+                </div>
+                <div className="w-full sm:w-[calc(50%-4px)]">
+                  <Input
+                    label="Příjmení"
+                    type="text"
+                    placeholder="Vaše příjmení"
+                    value={lastName}
+                    onChange={(e) => setLastName(e.target.value)}
+                    icon={<User className="w-5 h-5" />}
+                  />
+                </div>
+              </div>
+
+              <div className="w-full">
                 <Input
-                  label="Jméno"
-                  type="text"
-                  placeholder="Vaše jméno"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  icon={<User className="w-5 h-5" />}
+                  label="Email"
+                  type="email"
+                  placeholder="Váš email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  icon={<Mail className="w-5 h-5" />}
                   required
-                />
-                <Input
-                  label="Příjmení"
-                  type="text"
-                  placeholder="Vaše příjmení"
-                  value={lastName}
-                  onChange={(e) => setLastName(e.target.value)}
-                  icon={<User className="w-5 h-5" />}
                 />
               </div>
 
-              <Input
-                label="Email"
-                type="email"
-                placeholder="Váš email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                icon={<Mail className="w-5 h-5" />}
-                required
-              />
-
-              <Input
-                label="Registrační kód"
-                type="text"
-                placeholder="Zadejte registrační kód"
-                value={code}
-                onChange={(e) => setCode(e.target.value.toUpperCase())}
-                icon={<Key className="w-5 h-5" />}
-                required
-              />
+              <div className="w-full">
+                <Input
+                  label="Registrační kód"
+                  type="text"
+                  placeholder="Zadejte registrační kód"
+                  value={code}
+                  onChange={(e) => setCode(e.target.value.toUpperCase())}
+                  icon={<Key className="w-5 h-5" />}
+                  required
+                />
+              </div>
 
               <div className="w-full">
                 <label className="block text-sm font-medium text-gray-700 mb-3">

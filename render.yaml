@@ -42,3 +42,33 @@ services:
     plan: starter
     databaseName: building_tracker
     user: building_tracker_user
+
+  - type: cron
+    name: weekly-cleaning-reminders
+    env: node
+    plan: starter
+    schedule: "0 18 * * 0"  # Každou neděli v 18:00 UTC (19:00 českého času)
+    buildCommand: npm install
+    startCommand: node scripts/send-weekly-reminders.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        value: postgresql://arbespostgres_user:JXT7NsMmPn6Wdb6aNa818rc1Qhojs048@dpg-d383h3nfte5s73bouon0-a.frankfurt-postgres.render.com/arbespostgres
+      - key: API_URL
+        fromService:
+          type: web
+          name: building-tracker
+          property: host
+      - key: SMTP_HOST
+        value: smtp.gmail.com
+      - key: SMTP_PORT
+        value: "587"
+      - key: SMTP_USER
+        value: ""
+      - key: SMTP_PASS
+        value: ""
+      - key: FROM_EMAIL
+        value: ""
+      - key: FROM_NAME
+        value: "Building Tracker"

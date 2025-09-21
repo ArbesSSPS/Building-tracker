@@ -181,7 +181,7 @@ function formatPeriod(period: string, frequency: string): string {
 }
 
 // POST /api/email/send-weekly-reminders - Automatické posílání týdenních připomínek
-export async function POST(request: NextRequest) {
+async function sendWeeklyReminders() {
   try {
     console.log('Starting weekly cleaning reminders...');
     
@@ -284,22 +284,12 @@ export async function POST(request: NextRequest) {
   }
 }
 
+// POST /api/email/send-weekly-reminders - Automatické posílání týdenních připomínek
+export async function POST(request: NextRequest) {
+  return await sendWeeklyReminders();
+}
+
 // GET /api/email/send-weekly-reminders - Test endpoint (manual trigger)
 export async function GET() {
-  try {
-    console.log('Manual trigger of weekly reminders...');
-    
-    // Call the POST handler
-    const response = await POST(new NextRequest('http://localhost:3000/api/email/send-weekly-reminders', {
-      method: 'POST'
-    }));
-    
-    return response;
-  } catch (error) {
-    console.error('Error in manual trigger:', error);
-    return NextResponse.json(
-      { error: 'Failed to trigger weekly reminders', details: error },
-      { status: 500 }
-    );
-  }
+  return await sendWeeklyReminders();
 }

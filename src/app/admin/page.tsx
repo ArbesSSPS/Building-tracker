@@ -1528,7 +1528,7 @@ export default function AdminDashboard() {
                           <option value="">Žádná místnost</option>
                           {rooms.map((room) => (
                             <option key={room.id} value={room.id}>
-                              {room.name} (Patro {room.floor.number})
+                              {room.name} (Patro {room.floor?.number || '?'})
                             </option>
                           ))}
                         </select>

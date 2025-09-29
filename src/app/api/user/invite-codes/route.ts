@@ -59,9 +59,8 @@ export async function POST(request: NextRequest) {
         data: {
           code: code!,
           expiresAt,
-          // Store the inviting user's room ID in a custom field
-          // We'll use the usedBy field to store the room ID temporarily
-          usedBy: user.roomId
+          // Store the inviting user's room ID in the roomId field
+          roomId: user.roomId
         }
       })
 

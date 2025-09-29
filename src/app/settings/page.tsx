@@ -91,10 +91,15 @@ export default function SettingsPage() {
 
   const fetchInviteCodes = async () => {
     try {
+      console.log('🔍 Fetching invite codes...')
       const response = await fetch('/api/user/invite-codes')
       const data = await response.json()
+      console.log('📋 Invite codes response:', data)
       if (data.success) {
         setInviteCodes(data.codes)
+        console.log('✅ Invite codes loaded:', data.codes)
+      } else {
+        console.error('❌ Failed to load invite codes:', data.error)
       }
     } catch (error) {
       console.error('Error fetching invite codes:', error)
@@ -146,6 +151,7 @@ export default function SettingsPage() {
   const generateInviteCodes = async () => {
     setGenerating(true)
     try {
+      console.log('🚀 Generating invite codes...', { count: newCodeCount, expiresInDays: newCodeExpires })
       const response = await fetch('/api/user/invite-codes', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -155,9 +161,13 @@ export default function SettingsPage() {
         })
       })
       const data = await response.json()
+      console.log('📋 Generate response:', data)
       if (data.success) {
+        console.log('✅ Codes generated successfully, fetching updated list...')
         await fetchInviteCodes()
         setNewCodeCount(1)
+      } else {
+        console.error('❌ Failed to generate codes:', data.error)
       }
     } catch (error) {
       console.error('Error generating invite codes:', error)

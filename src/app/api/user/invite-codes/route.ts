@@ -33,6 +33,8 @@ export async function POST(request: NextRequest) {
       select: { roomId: true }
     })
 
+    console.log('🚀 Generating codes for user:', { userId: session.user.id, roomId: user?.roomId })
+
     if (!user?.roomId) {
       return NextResponse.json({ error: 'Uživatel není přiřazen k žádné místnosti' }, { status: 400 })
     }
@@ -99,18 +101,22 @@ export async function GET() {
       select: { roomId: true }
     })
 
+    console.log('👤 User for invite codes:', { userId: session.user.id, roomId: user?.roomId })
+
     if (!user?.roomId) {
       return NextResponse.json({ error: 'Uživatel není přiřazen k žádné místnosti' }, { status: 400 })
     }
 
-    // Get invite codes created by this user (stored in usedBy field)
+    // Get invite codes created by this user (stored in roomId field)
     const codes = await prisma.registrationCode.findMany({
       where: {
-        usedBy: user.roomId,
+        roomId: user.roomId,
         isUsed: false
       },
       orderBy: { createdAt: 'desc' }
     })
+
+    console.log('📋 Found codes in DB:', codes.length, codes.map(c => ({ code: c.code, roomId: c.roomId, isUsed: c.isUsed })))
 
     return NextResponse.json({
       success: true,
